@@ -18,6 +18,15 @@ def get_color_from_string(color_str):
     
     return (b, g, r)  # OpenCV menggunakan format BGR, jadi kita urutkan b, g, r
 
+def denoise_frame(frame):
+    """Mengurangi noise pada frame menggunakan Gaussian Blur."""
+    return cv2.GaussianBlur(frame, (5, 5), 0)
+
+def sharpen_frame(frame):
+    """Menajamkan frame dengan filter kernel."""
+    kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])
+    return cv2.filter2D(frame, -1, kernel)
+
 def preprocess_logo_video(logo, scale_factor):
     """Melakukan preprocessing pada logo: mengubah ukuran, menghilangkan latar belakang."""
     logo_resized = cv2.resize(logo, (int(logo.shape[1] * scale_factor), int(logo.shape[0] * scale_factor)))
@@ -152,6 +161,9 @@ def add_watermark_to_multiple_videos(video_paths, watermark_type, output_path,ou
             if not ret:
                 break
 
+            frame = denoise_frame(frame)
+            frame = sharpen_frame(frame)
+
             # Jika watermark berupa logo
             if watermark_type == 'logo':
                 logo_path = kwargs.get('logo_path')
@@ -213,7 +225,7 @@ def add_watermark_to_multiple_videos(video_paths, watermark_type, output_path,ou
 #     output_path="Watermarked Content",
 #     logo_path='Gambar\\watermark logo.png',
 #     position_str=8,
-#     opacity=0.7
+#     opacity=0.5
 # )
 
 # print(f"Video dengan watermark disimpan sebagai: {output_videos}")
@@ -221,10 +233,12 @@ def add_watermark_to_multiple_videos(video_paths, watermark_type, output_path,ou
 # output_videos = add_watermark_to_multiple_videos(
 #     video_paths=file_paths,
 #     watermark_type='text',
+#     output_path='Watermarked Content',
 #     text='Hak Cipta 2024',
 #     position_str=8,#'kanan bawah',
 #     font_color="#49FFCE",  # Nama warna
-#     opacity=0.7
+#     opacity=0.3,
+#     #thickness=2
 # )
 
 # print(f"Video dengan watermark disimpan sebagai: {output_videos}")

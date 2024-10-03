@@ -98,10 +98,10 @@ if file_ext in watermark_handler.supported_image_types:
             watermark_type='text',
             output_path="Watermarked Content",
             text='Hak Cipta 2024',
-            position_str=2,  # Posisi watermark (misalnya kanan atas)
-            opacity=0.5,
+            position_str=-2,  # Posisi watermark (misalnya kanan atas)
+            opacity=0.3,
             font_color='#49FFCE',
-            thickness=2,
+            #thickness=1,
             output_format='png'
         )
     # Jika user memilih watermark logo
