@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from tkinter import Tk
 from tkinter.filedialog import askopenfilenames
+import os
 
 # Fungsi untuk mendapatkan warna RGB dari kode hex
 def get_color_from_string(color_str):
@@ -211,25 +212,85 @@ def add_watermark_with_auto_position(image, watermark, watermark_type='logo', fo
 
     return image
 
-import os
-# Fungsi utama untuk menambahkan watermark pada gambar
-def main(image_path, watermark_type, output_path,text=None, logo_path=None, position_str=None, opacity=None, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
+
+# Fungsi untuk menambahkan watermark di bawah gambar dengan bar putih
+# Fungsi untuk menambahkan watermark di bawah gambar dengan bar putih dan scale factor
+def add_watermark_below_image(image_path, text=None, bar_height=50, opacity=0.3, font_color=(0, 0, 0), font_scale=1, thickness=2, scale_factor=0.7):
+    # Load image
+    image = cv2.imread(image_path)
+    if image is None:
+        raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
+    
+    # Ukuran gambar asli
+    h, w, _ = image.shape
+
+    # Buat bar putih di bawah gambar
+    bar = np.ones((bar_height, w, 3), dtype=np.uint8) * 255  # Membuat bar putih dengan tinggi tertentu
+
+    # Gabungkan gambar asli dengan bar putih di bawahnya
+    combined_image = np.vstack((image, bar)).astype(np.uint8)
+
+    # Jika watermark berupa teks
+    if text:
+        # Sesuaikan skala teks berdasarkan scale factor
+        scaled_font_scale = font_scale * scale_factor
+
+        # Posisi teks di kanan bar dengan scale factor
+        text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scaled_font_scale, thickness)[0]
+        text_x = w - text_size[0] - 10  # Teks di sebelah kanan dengan padding 10 px
+        text_y = h + (bar_height + text_size[1]) // 2
+
+        # Tambahkan teks ke bar putih
+        cv2.putText(combined_image, text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, scaled_font_scale, font_color, thickness, cv2.LINE_AA)
+
+    # Membuat overlay yang sama ukurannya dengan gambar yang telah digabungkan
+    overlay = combined_image.copy()
+
+    # Terapkan opacity ke bar dengan teks
+    cv2.addWeighted(overlay, opacity, combined_image, 1 - opacity, 0, combined_image)
+
+    return combined_image
+
+# Fungsi utama untuk menambahkan watermark dan menyimpan dalam berbagai format
+def main(image_path, watermark_type, output_path, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50,font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
     # Load image
     image = cv2.imread(image_path)
 
     if image is None:
         raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
 
-    # Preprocess image
-    preprocessed_image = preprocess_image(image)
+    # Preprocess image jika diperlukan
+    preprocessed_image = image  # Placeholder untuk preprocessing jika diperlukan
 
+    # Jika watermark berupa teks
     if watermark_type == 'text':
         if text is None:
             raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-        if position_str == -1:
-            image = add_watermark_with_auto_position(preprocessed_image, text, watermark_type='text', font_color=font_color, thickness=thickness, opacity=opacity)
+        
+        # Jika posisi adalah -2, gunakan fungsi `add_watermark_below_image`
+        if position_str == -2:
+            image_with_watermark = add_watermark_below_image(
+                image_path=image_path,
+                text=text,
+                bar_height=bar_height,  # Tinggi bar bisa disesuaikan
+                opacity=opacity,
+                font_color=font_color,
+                scale_factor=scale_factor,
+                font_scale=1,  # Anda bisa mengganti skala font sesuai kebutuhan
+                thickness=thickness
+            )
+        elif position_str == -1:
+            # Implementasi watermark otomatis (jika ada)
+            image_with_watermark = add_watermark_with_auto_position(
+                preprocessed_image, text, watermark_type='text', font_color=font_color, thickness=thickness, opacity=opacity
+            )
         else:
-            image = add_text_watermark(preprocessed_image, text, position_str, font_color=font_color, opacity=opacity, thickness=thickness)
+            # Implementasi watermark di posisi yang ditentukan
+            image_with_watermark = add_text_watermark(
+                preprocessed_image, text, position_str, font_color=font_color, opacity=opacity, thickness=thickness
+            )
+    
+    # Jika watermark berupa logo
     elif watermark_type == 'logo':
         if logo_path is None:
             raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
@@ -238,28 +299,32 @@ def main(image_path, watermark_type, output_path,text=None, logo_path=None, posi
         logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
 
         if position_str == -1:
-            image = add_watermark_with_auto_position(preprocessed_image, logo, watermark_type='logo', opacity=opacity)
+            # Implementasi watermark otomatis (jika ada)
+            image_with_watermark = add_watermark_with_auto_position(
+                preprocessed_image, logo, watermark_type='logo', opacity=opacity
+            )
         else:
-            image = add_logo_watermark(preprocessed_image, logo, position_str, opacity=opacity)
+            # Implementasi watermark logo di posisi yang ditentukan
+            image_with_watermark = add_logo_watermark(
+                preprocessed_image, logo, position_str, opacity=opacity
+            )
 
-    # Membuat folder "Watermarked Image" jika belum ada
-    #output_folder = "Watermarked Image"
-    output_folder = output_path
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    # Membuat folder output jika belum ada
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
 
     # Menambahkan "Watermark" pada nama file
     base_name = os.path.basename(image_path)  # Ambil nama file dari path
     name, ext = os.path.splitext(base_name)  # Pisahkan nama dan ekstensi
-    output_filename = os.path.join(output_folder, f'Watermark_{name}.{output_format}')  # Buat nama file baru dalam folder "Watermarked Image"
+    output_filename = os.path.join(output_path, f'Watermark_{name}.{output_format}')  # Buat nama file dengan format yang dipilih
 
-    # Simpan gambar dengan watermark
+    # Simpan gambar dengan format yang dipilih oleh pengguna (JPG/PNG/JPEG)
     if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-        cv2.imwrite(output_filename, image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])  # Simpan sebagai JPG
+        cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])  # Simpan sebagai JPG atau JPEG
     elif output_format.lower() == 'png':
-        cv2.imwrite(output_filename, image)  # Simpan sebagai PNG
+        cv2.imwrite(output_filename, image_with_watermark)  # Simpan sebagai PNG
     else:
-        raise ValueError("Format output tidak didukung. Silakan pilih 'jpg' atau 'png'.")
+        raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
 
     return output_filename
 
@@ -314,21 +379,20 @@ def process_multiple_files(file_paths, watermark_type,output_path, text=None, th
 # else:
 #     print("Tidak ada file yang dipilih.")
 
-# Jika ada file yang dipilih
-# if file_paths:
-#     # Proses setiap file yang dipilih
-#     process_multiple_files(
-#         file_paths=file_paths,
-#         watermark_type='logo',
-#         logo_path='C:\\D\Bootcamp\\ICStar Hackathon 2024\\Project Watermark\\BackEnd Watermark\\Gambar\\watermark logo.png',  # Sesuaikan dengan path logo Anda
-#         position_str="kanan bawah",
-#         opacity=0.5,
-#         scale_factor=0.3,
-#         font_color='merah',  # Input warna sebagai string
-#         output_format='png'  # Format output (bisa 'png' atau 'jpg')
-#     )
-# else:
-#     print("Tidak ada file yang dipilih.")
-
 # Path Directory
 # C:\D\Bootcamp\ICStar Hackathon 2024\Project Watermark\BackEnd Watermark\Gambar\ 
+
+# Contoh penggunaan untuk di luar image
+# output_image = main(
+#     image_path='Gambar\komputer mainframe1.jpg',
+#     watermark_type='text',
+#     output_path="Watermarked Content",
+#     text='Hak Cipta 2024',
+#     position_str=-2,  # Gunakan posisi di bawah gambar (bar putih)
+#     opacity=0.6,
+#     bar_height=20,  # Tinggi bar putih
+#     font_color=(73, 255, 206),  # Warna dalam RGB
+#     output_format='jpeg',  # Format yang dipilih user (bisa 'jpg', 'jpeg', atau 'png')
+# )
+
+# print(f"Watermark telah ditambahkan: {output_image}")
