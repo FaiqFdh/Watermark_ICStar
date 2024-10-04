@@ -71,16 +71,17 @@ file_paths = select_files()
 
 # Fungsi Untuk Gambar
 #file_paths = ['Gambar\\shopping after.jpg','Gambar\\komputer mainframe1.jpg']
-# Untuk Gambar dengan Watermark Text
-# result = run_watermark_handler(file_paths=file_paths,
-#                                watermark_type='text',
-#                                output_path='Watermarked Content',
-#                                text='Sample Watermark',
-#                                position_str=2,
-#                                font_color="#49FFCE",
-#                                opacity=0.3,
-#                                output_format='png'
-#                                )
+#Untuk Gambar dengan Watermark Text
+result = run_watermark_handler(file_paths=file_paths,
+                               watermark_type='text',
+                               output_path='Watermarked Content',
+                               text='Sample Watermark',
+                               position_str=2,
+                               font_color="#49FFCE",
+                               opacity=0.3,
+                               output_format='png'
+                               )
+print(result)
 
 # Untuk Gambar dengan Watermark Logo
 # result = run_watermark_handler(file_paths=file_paths,
