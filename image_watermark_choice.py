@@ -213,11 +213,11 @@ def add_watermark_with_auto_position(image, watermark, watermark_type='logo', fo
     return image
 
 # Fungsi untuk menambahkan watermark di bawah gambar dengan bar putih dan scale factor
-def add_watermark_below_image(image_path, text=None, bar_height=50, opacity=0.3, font_color=(0, 0, 0), font_scale=1, thickness=1, scale_factor=0.7):
+def add_watermark_below_image(image, text=None, bar_height=50, opacity=0.3, font_color=(0, 0, 0), font_scale=1, thickness=2, scale_factor=0.7):
     # Load image
-    image = cv2.imread(image_path)
-    if image is None:
-        raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
+    # image = cv2.imread(image_path)
+    # if image is None:
+    #     raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
     
     # Ukuran gambar asli
     h, w, _ = image.shape
@@ -247,6 +247,7 @@ def add_watermark_below_image(image_path, text=None, bar_height=50, opacity=0.3,
 
     return combined_image
 
+"""
 #Fungsi utama untuk menambahkan watermark dan menyimpan dalam berbagai format
 def main(image_path, watermark_type, output_path, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50,font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
     # Load image
@@ -323,30 +324,8 @@ def main(image_path, watermark_type, output_path, text=None, logo_path=None, pos
         raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
 
     return output_filename
-
 """
-# Fungsi untuk menghapus bar putih di sekitar gambar
-def remove_white_borders(image):
-    # Mengubah gambar ke grayscale
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
-    # Thresholding untuk mendeteksi area putih
-    _, thresh = cv2.threshold(gray_image, 240, 255, cv2.THRESH_BINARY)
-    
-    # Menemukan kontur untuk mengidentifikasi area gambar yang mengandung konten
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Jika tidak ada kontur yang ditemukan, kembalikan gambar tanpa perubahan
-    if len(contours) == 0:
-        return image
-    
-    # Menemukan bounding box yang mencakup semua kontur
-    x, y, w, h = cv2.boundingRect(contours[0])
-    
-    # Memotong gambar berdasarkan bounding box
-    cropped_image = image[y:y+h, x:x+w]
-    
-    return cropped_image
+
 
 import cv2
 import os
@@ -354,32 +333,34 @@ from pdf2image import convert_from_path
 from PIL import Image
 import numpy as np
 
-def remove_white_borders(image):
-    
-    #Menghapus bar putih di sekitar gambar
-    
-    # Konversi gambar ke grayscale untuk mempermudah deteksi area putih
+def remove_white_background(image, margin=0):
+    # Convert image ke format grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
-    # Threshold untuk mendeteksi area putih (background)
-    _, thresholded = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
-    
-    # Temukan kontur di gambar thresholded
-    contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # Temukan bounding box terbesar (area non-putih)
-    x, y, w, h = cv2.boundingRect(contours[0])
-    
-    # Potong gambar berdasarkan bounding box yang ditemukan
-    cropped_image = image[y:y+h, x:x+w]
-    
-    return cropped_image
+
+    # Menggunakan adaptive threshold untuk mendeteksi area non-putih
+    _, binary = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+
+    # Temukan kontur
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Jika kontur ditemukan
+    if contours:
+        # Dapatkan bounding box terbesar dari semua kontur
+        x, y, w, h = cv2.boundingRect(max(contours, key=cv2.contourArea))
+
+        # Crop gambar berdasarkan bounding box, tambahkan margin opsional
+        cropped_image = image[max(0, y - margin):y + h + margin, max(0, x - margin):x + w + margin]
+
+        return cropped_image
+    else:
+        # Jika tidak ada kontur, kembalikan gambar asli
+        return image
 
 def main(image_path, watermark_type, output_path, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
     # Cek apakah file yang diupload adalah PDF
     if image_path.lower().endswith('.pdf'):
         # Konversi PDF ke gambar
-        images = convert_from_path(image_path, poppler_path=r"C:\\Users\\user\\poppler\\poppler-24.07.0\\Library\bin")
+        images = convert_from_path(image_path, dpi=300,poppler_path=r"C:\\Users\\user\\poppler\\poppler-24.07.0\\Library\bin")
         output_files = []
         watermarked_images = []  # Menyimpan gambar dengan watermark untuk dikonversi kembali ke PDF
         
@@ -388,16 +369,19 @@ def main(image_path, watermark_type, output_path, text=None, logo_path=None, pos
             open_cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
             
             # Menghapus bar putih di sekitar gambar
-            open_cv_image = remove_white_borders(open_cv_image)
+            open_cv_image = remove_white_background(open_cv_image,margin=0)
+
+            open_cv_image = preprocess_image(open_cv_image)
             
             # Memanggil fungsi watermark untuk setiap halaman gambar
             if watermark_type == 'text':
+                font_color = get_color_from_string(font_color)
                 if text is None:
                     raise ValueError("Text harus disediakan untuk watermark jenis teks.")
                 
                 if position_str == -2:
                     image_with_watermark = add_watermark_below_image(
-                        image_path=image_path,
+                        open_cv_image,
                         text=text,
                         bar_height=bar_height,
                         opacity=opacity,
@@ -414,6 +398,7 @@ def main(image_path, watermark_type, output_path, text=None, logo_path=None, pos
                     image_with_watermark = add_text_watermark(
                         open_cv_image, text, position_str, font_color=font_color, opacity=opacity, thickness=thickness
                     )
+                    
             elif watermark_type == 'logo':
                 if logo_path is None:
                     raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
@@ -470,17 +455,19 @@ def main(image_path, watermark_type, output_path, text=None, logo_path=None, pos
             raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
 
         # Preprocess image jika diperlukan
-        preprocessed_image = image  # Placeholder untuk preprocessing jika diperlukan
+        #preprocessed_image = image  # Placeholder untuk preprocessing jika diperlukan
+        preprocessed_image = preprocess_image(image)
 
         # Jika watermark berupa teks
         if watermark_type == 'text':
+            font_color = get_color_from_string(font_color)
             if text is None:
                 raise ValueError("Text harus disediakan untuk watermark jenis teks.")
             
             # Jika posisi adalah -2, gunakan fungsi `add_watermark_below_image`
             if position_str == -2:
                 image_with_watermark = add_watermark_below_image(
-                    image_path=image_path,
+                    preprocessed_image,
                     text=text,
                     bar_height=bar_height,  # Tinggi bar bisa disesuaikan
                     opacity=opacity,
@@ -536,8 +523,8 @@ def main(image_path, watermark_type, output_path, text=None, logo_path=None, pos
         else:
             raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
 
-        return output_filename"""
-
+        return output_filename
+    
 # Contoh penggunaan untuk di luar image
 # output_image = main(
 #     image_path='Gambar\\komputer mainframe1.jpg',
@@ -554,7 +541,7 @@ def main(image_path, watermark_type, output_path, text=None, logo_path=None, pos
 #def process_multiple_files(file_paths, watermark_type, font_scale=1,text=None, logo_path=None, scale_factor=None, position_str="kanan bawah", opacity=None, font_color="putih", output_format='png'):
 def process_multiple_files(file_paths, watermark_type,output_path, text=None, thickness=None,logo_path=None, scale_factor=0.3, position_str=9, opacity=None, font_color="putih", output_format='png'):
     # Konversi warna string ke tuple BGR menggunakan get_color_from_string
-    font_color_bgr = get_color_from_string(font_color)
+    #font_color_bgr = get_color_from_string(font_color)
 
     for file_path in file_paths:
         if os.path.isfile(file_path):
@@ -569,7 +556,7 @@ def process_multiple_files(file_paths, watermark_type,output_path, text=None, th
                 thickness=thickness,
                 position_str=position_str,
                 opacity=opacity,
-                font_color=font_color_bgr,  # Pastikan warna dikonversi ke BGR
+                font_color=font_color,  # Pastikan warna dikonversi ke BGR
                 output_format=output_format
             )
             print(f"Gambar dengan watermark disimpan sebagai {output_image}")
@@ -583,7 +570,7 @@ def process_multiple_files(file_paths, watermark_type,output_path, text=None, th
 # # Memilih file secara langsung dengan tkinter
 # file_paths = select_files()
 
-# #Jika ada file yang dipilih
+# # # #Jika ada file yang dipilih
 # if file_paths:
 #     # Proses setiap file yang dipilih
 #     process_multiple_files(

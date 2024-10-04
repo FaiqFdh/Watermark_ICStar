@@ -56,7 +56,7 @@ def add_logo_watermark_video(frame, logo, position, opacity=1.0):
              (1.0 - logo[:, :, 3] / 255.0 * opacity))
     return frame
 
-def add_text_watermark_video(frame, text, position, font_color, thickness=1, scale_factor=0.05, opacity=1.0):
+def add_text_watermark_video(frame, text, position, font_color, thickness=2, scale_factor=0.05, opacity=1.0):
     """Menambahkan watermark teks ke frame dengan transparansi di posisi yang ditentukan."""
     font = cv2.FONT_HERSHEY_SIMPLEX
     scale = scale_factor * frame.shape[1] / 1000  # Menyesuaikan ukuran teks
