@@ -268,6 +268,107 @@ def add_watermark_to_multiple_videos(video_paths, watermark_type, output_path, o
     else:
         return ["Watermark"] + output_video_paths # Return "Watermark" sebagai penanda sukses dan output video paths
 
+# def add_watermark_to_multiple_videos(video_paths, watermark_type, output_path, output_format='mp4', **kwargs):
+    """Menambahkan watermark ke beberapa video berdasarkan jenis watermark yang dipilih."""
+    output_video_paths = []  # Menyimpan daftar video yang berhasil diproses
+    error_messages = []  # Menyimpan pesan error jika ada
+    
+    # Buat folder output jika belum ada
+    os.makedirs(output_path, exist_ok=True)
+
+    # Tentukan codec video berdasarkan format output
+    if output_format == 'mp4':
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    elif output_format == 'avi':
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    elif output_format == 'mov':
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    else:
+        raise ValueError(f"Tipe format output '{output_format}' tidak didukung. Pilih antara 'mp4', 'avi', atau 'mov'.")
+
+    # Loop melalui semua video yang akan diberi watermark
+    for input_video_path in video_paths:
+        try:
+            # Coba buka video input
+            cap = cv2.VideoCapture(input_video_path)
+            if not cap.isOpened():
+                raise ValueError(f"Video tidak dapat dibuka: {input_video_path}")
+
+            # Ambil informasi video (fps, ukuran frame, dll.)
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+            # Generate output filename secara otomatis
+            filename = os.path.basename(input_video_path)
+            output_video_path = os.path.join(output_path, f"Watermark_{filename.split('.')[0]}.{output_format}")
+            output_video_paths.append(output_video_path)
+
+            # Buat video writer
+            out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
+
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+
+                # Proses denoise dan sharpening frame jika diperlukan
+                frame = denoise_frame(frame)
+                frame = sharpen_frame(frame)
+
+                # Tambahkan watermark berdasarkan jenis yang dipilih
+                if watermark_type == 'logo':
+                    logo_path = kwargs.get('logo_path')
+                    position_str = kwargs.get('position_str', 'kanan bawah')
+                    opacity = kwargs.get('opacity', 0.6)
+
+                    # Load logo dan preprocess
+                    logo = cv2.imread(logo_path, cv2.IMREAD_UNCHANGED)
+                    if logo is None:
+                        raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
+                    logo = preprocess_logo_video(logo, kwargs.get('scale_factor', 0.3))
+
+                    # Dapatkan posisi watermark
+                    position = get_watermark_position_video(frame, logo, position_str)
+
+                    # Tambahkan logo watermark
+                    frame = add_logo_watermark_video(frame, logo, position, opacity)
+
+                elif watermark_type == 'text':
+                    text = kwargs.get('text', '')
+                    position_str = kwargs.get('position_str', 'bawah kanan')
+
+                    # Dapatkan warna font dari input user (gunakan putih sebagai default)
+                    color_str = kwargs.get('font_color', '#FFFFFF')
+                    font_color = get_color_from_string(color_str)  # Ambil warna dari hex atau nama warna
+                    
+                    thickness = kwargs.get('thickness', 2)
+                    scale_factor = kwargs.get('scale_factor', 0.5)
+                    opacity = kwargs.get('opacity', 0.6)
+                    font_type = kwargs.get('font_type', 'hershey simplex')
+
+                    # Tambahkan teks watermark
+                    frame = add_text_watermark_video(frame, text, position_str, font_color, font_type, thickness, scale_factor, opacity)
+
+                # Tulis frame ke video output
+                out.write(frame)
+
+            # Bersihkan resources
+            cap.release()
+            out.release()
+
+        except Exception as e:
+            # Jika terjadi error, tambahkan pesan error dan lanjutkan ke video berikutnya
+            error_messages.append(f"Error pada video {input_video_path}: {str(e)}")
+    
+    cv2.destroyAllWindows()
+
+    # Return daftar video output yang berhasil dihasilkan, atau error jika ada
+    if error_messages:
+        combined_list = output_video_paths + error_messages  # Gabungkan output video dengan pesan error
+        return combined_list
+    else:
+        return ["Watermark"] + output_video_paths  # Return "Watermark" sebagai penanda sukses dan output video paths
 
 
 # Contoh penggunaan untuk beberapa video

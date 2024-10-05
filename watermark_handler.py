@@ -63,13 +63,13 @@ def run_watermark_handler(file_paths, watermark_type, output_path,enchance_quali
     return result
 
 # Fungsi untuk memilih file menggunakan tkinter
-def select_files():
-    Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
-    file_paths = askopenfilenames(title="Pilih File", filetypes=[("Image files", "*.jpg *.jpeg *.png *.mp4 *.avi *.mov *.pdf")])
-    return file_paths
+# def select_files():
+#     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
+#     file_paths = askopenfilenames(title="Pilih File", filetypes=[("Image files", "*.jpg *.jpeg *.png *.mp4 *.avi *.mov *.pdf")])
+#     return file_paths
 
-# Memilih file secara langsung dengan tkinter
-file_paths = select_files()
+# # Memilih file secara langsung dengan tkinter
+# file_paths = select_files()
 
 #file_paths = ['Gambar\fsdsd.png']
 
@@ -115,18 +115,18 @@ file_paths = select_files()
 # print(result)
 
 # Untuk Video dengan Watermark Text
-result = run_watermark_handler(file_paths=file_paths,
-                                watermark_type='text',
-                                output_path="Watermarked Content",
-                                text='Hak Cipta 2024',
-                                enchance_quality=False,
-                                position_str='bawah kanan',
-                                #font_color="#49FFCE",  # Nama warna
-                                font_color="red",  # Nama warna
-                                font_type='hershey script simplex',
-                                opacity=0.5,
-                                output_format='mp4',
-                                #thickness=2
-                               )
+# result = run_watermark_handler(file_paths=file_paths,
+#                                 watermark_type='text',
+#                                 output_path="Watermarked Content",
+#                                 text='Hak Cipta 2024',
+#                                 enchance_quality=False,
+#                                 position_str='bawah kanan',
+#                                 #font_color="#49FFCE",  # Nama warna
+#                                 font_color="red",  # Nama warna
+#                                 font_type='hershey script simplex',
+#                                 opacity=0.5,
+#                                 output_format='mp4',
+#                                 #thickness=2
+#                                )
 
-print(result)
+# print(result)
