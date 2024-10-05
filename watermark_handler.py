@@ -44,13 +44,15 @@ class WatermarkHandler:
 
 
 # Fungsi utama yang akan dipanggil dari UiPath
-def run_watermark_handler(file_paths, watermark_type, output_path,opacity=None, position_str=None,text=None, logo_path=None,font_color=None,output_format=None,thickness=None):
+def run_watermark_handler(file_paths, watermark_type, output_path,enchance_quality=None,font_type=None, opacity=None, position_str=None,text=None, logo_path=None,font_color=None,output_format=None,thickness=None):
     handler = WatermarkHandler()
     result = handler.process_files(
         file_paths=file_paths, 
         watermark_type=watermark_type, 
         output_path=output_path, 
+        enchance_quality = enchance_quality,
         opacity=opacity,
+        font_type=font_type,
         text=text, 
         logo_path=logo_path,
         font_color=font_color,
@@ -69,52 +71,62 @@ def select_files():
 # Memilih file secara langsung dengan tkinter
 file_paths = select_files()
 
+#file_paths = ['Gambar\fsdsd.png']
+
 # Fungsi Untuk Gambar
 #file_paths = ['Gambar\\shopping after.jpg','Gambar\\komputer mainframe1.jpg']
 #Untuk Gambar dengan Watermark Text
-result = run_watermark_handler(file_paths=file_paths,
-                               watermark_type='text',
-                               output_path='Watermarked Content',
-                               text='Sample Watermark',
-                               position_str=2,
-                               font_color="#49FFCE",
-                               opacity=0.3,
-                               output_format='png'
-                               )
-print(result)
+# result = run_watermark_handler(file_paths=file_paths,
+#                                watermark_type='text',
+#                                output_path='Watermarked Content',
+#                                enchance_quality=False,
+#                                text='Sample Watermark',
+#                                position_str='bawah kanan',
+#                                font_type='hershey script simplex',
+#                                font_color="#49FFCE",
+#                                opacity=0.3,
+#                                output_format='png'
+#                                )
+# print(result)
+#print(type(result))
 
 # Untuk Gambar dengan Watermark Logo
 # result = run_watermark_handler(file_paths=file_paths,
 #                                watermark_type='logo',
 #                                output_path='Watermarked Content',
 #                                logo_path='Gambar\\watermark logo.png',
-#                                position_str=2,
+#                                position_str='auto',
 #                                opacity=0.5,
 #                                output_format='png'
 #                                )
+
+# print(result)
 
 # Untuk Video dengan Watermark Logo
 # result = run_watermark_handler(file_paths=file_paths,
 #                                 watermark_type='logo',
 #                                 output_path="Watermarked Content",
 #                                 logo_path='Gambar\\watermark logo.png',
-#                                 position_str=8,
+#                                 position_str='atas kanan',
 #                                 opacity=0.5,
-#                                 output_format='avi'
+#                                 output_format='mp4'
 #                                )
 
 # print(result)
 
 # Untuk Video dengan Watermark Text
-# result = run_watermark_handler(file_paths=file_paths,
-#                                 watermark_type='text',
-#                                 output_path="Watermarked Content",
-#                                 text='Hak Cipta 2024',
-#                                 position_str=8,
-#                                 font_color="#49FFCE",  # Nama warna
-#                                 opacity=0.5,
-#                                 output_format='mp4',
-#                                 #thickness=2
-#                                )
+result = run_watermark_handler(file_paths=file_paths,
+                                watermark_type='text',
+                                output_path="Watermarked Content",
+                                text='Hak Cipta 2024',
+                                enchance_quality=False,
+                                position_str='bawah kanan',
+                                #font_color="#49FFCE",  # Nama warna
+                                font_color="red",  # Nama warna
+                                font_type='hershey script simplex',
+                                opacity=0.5,
+                                output_format='mp4',
+                                #thickness=2
+                               )
 
-# print(result)
+print(result)
