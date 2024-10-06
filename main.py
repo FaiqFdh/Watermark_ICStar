@@ -8,16 +8,15 @@ def select_files():
     file_paths = askopenfilenames(title="Pilih File", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("Video files", "*.mp4 *.avi *.mov"), ("PDF files", "*.pdf")])
     return file_paths
 
-def watermark_image(file_path, 
-                    logo_path=None,
-                    text=None, 
-                    font_type=None, 
-                    font_color=None, 
-                    position_str=None, 
-                    opacity=None, 
-                    output_format=None,
-                    enchance_quality=None, 
-                    output_path=None,
+def watermark_image(file_path,          # Content File Path (String)
+                    logo_path=None,     # Watermark File Path (String)
+                    text=None,          # Watermark Text (String)
+                    font_type=None,     # Watermak Text Font (String)
+                    font_color=None,    # Watermark Text Color (String)
+                    position_str=None,  # Watermark Position (String)
+                    opacity=None,       # Watermark Opacity (Float)
+                    output_format=None, # Output Format (String)
+                    enchance_quality=None, # Enchance Quality (Boolean)
                     watermark_type=None):
     """Menambahkan watermark ke gambar berdasarkan tipe yang dipilih."""
     
@@ -25,7 +24,6 @@ def watermark_image(file_path,
         # Untuk watermark teks
         result = run_watermark_handler(
             file_paths=file_path,
-            output_path=output_path,
             text=text,
             font_type=font_type,
             font_color=font_color,
@@ -42,7 +40,6 @@ def watermark_image(file_path,
         # Untuk Gambar dengan Watermark Logo
         result = run_watermark_handler(
             file_paths=file_path,
-            output_path=output_path,
             logo_path=logo_path,
             position_str=position_str,
             opacity=opacity,
@@ -52,17 +49,17 @@ def watermark_image(file_path,
         )
         #print('watermark logo', result)
         return result
+    
 
-def watermark_video(file_path, 
-                    logo_path=None,
-                    text=None,
-                    font_type=None, 
-                    font_color=None,
-                    position_str=None, 
-                    opacity=None, 
-                    output_format=None,
-                    enchance_quality=None, 
-                    output_path=None, 
+def watermark_video(file_path,              # Content File Path (String)
+                    logo_path=None,         # Watermark File Path (String)
+                    text=None,              # Watermark Text (String)
+                    font_type=None,         # Watermark Text Font (String)
+                    font_color=None,        # Watermark Font Color (String)
+                    position_str=None,      # Watermark Position (String)
+                    opacity=None,           # Watermark Opacity (Float)
+                    output_format=None,     # Output Format (String)
+                    enchance_quality=None,  # Enhchance Quality (Boolean)
                     watermark_type=None): 
     """Menambahkan watermark ke video berdasarkan tipe yang dipilih."""
     
@@ -77,7 +74,6 @@ def watermark_video(file_path,
             opacity=opacity,
             output_format=output_format,
             enchance_quality=enchance_quality,
-            output_path=output_path,
             watermark_type='text'
         )
         #print('watermark text', result)
@@ -92,35 +88,36 @@ def watermark_video(file_path,
             opacity=opacity,
             output_format=output_format,
             enchance_quality=enchance_quality,
-            output_path=output_path,
             watermark_type='logo'
         )
         #print('watermark logo', result)
         return result
 
-file_paths = ['Gambar\komputer mainframe1.jpg','Gambar\shopping after.jpg']
-#file_paths = ['Gambar\komputer mainframe1.jpg']
+#file_paths = ['Gambar\komputer mainframe1.jpg','Gambar\shopping after.jpg']
+#file_paths = 'Gambar\gambar pdf2.pdf'
+file_paths = "Gambar\komputer mainframe1.jpg"
 
-results = watermark_image(file_paths,output_path='Watermarked Content',
+results = watermark_image(file_paths,
                     text='Sample Watermark',font_type='hershey script simplex',
                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='png',
                     enchance_quality=True,
                     #logo_path=None)
-                    logo_path='Gambar\watermark logo.png')
+                    logo_path='Gambar\\watermark logo.png')
 
 print(results)
 
-file_paths = ['Gambar\SampleVideo_1280x720_1mb.mp4','Gambar\file_example_MP4_1920_18MG.mp4']
-#file_paths = ['Gambar\komputer mainframe1.jpg']
+#file_paths = ['Gambar\SampleVideo_1280x720_1mb.mp4','Gambar\file_example_MP4_1920_18MG.mp4']
+#file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
+# file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
 
-results = watermark_video(file_paths,output_path='Watermarked Content',
-                    text='Sample Watermark',font_type='hershey script simplex',
-                    font_color='red',position_str='bawah kanan',opacity=0.3,output_format='mp4',
-                    enchance_quality=True,
-                    logo_path='')
-                    #logo_path='Gambar\watermark logo.png')
+# results = watermark_video(file_paths,
+#                     text='Sample Watermark',font_type='hershey script simplex',
+#                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='mp4',
+#                     enchance_quality=True,
+#                     logo_path='')
+#                     #logo_path='Gambar\watermark logo.png')
 
-print(results)
+# print(results)
 
 # def select_files():
 #     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
