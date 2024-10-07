@@ -251,22 +251,19 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
         cap.release()
         out.release()
 
-    #except Exception as e:
-        # Jika terjadi error, tambahkan pesan error
-        #error_messages.append(video_path)
-        #error_messages.append(f"Error while embedding watermark: {str(e)}")
-        #error_messages.append(f"Error while embedding watermark")
-
     except Exception as e:
         # Jika terjadi error, tambahkan pesan error
         error_messages.append(video_path)
+        error_messages.append(f"Error while embedding watermark: {str(e)}")
+        #error_messages.append(f"Error while embedding watermark")
         
     cv2.destroyAllWindows()
 
     # Return daftar video output yang berhasil dihasilkan, atau error jika ada
     if error_messages:
         #combined_list = output_video_paths + error_messages  # Gabungkan output video dengan pesan error
-        return error_messages + ['Error while embedding watermark']
+        #return error_messages + ['Error while embedding watermark']
+        return error_messages  
     else:
         return output_video_paths + ['']  # Return output video paths yang berhasil dihasilkan
 

@@ -95,29 +95,29 @@ def watermark_video(file_path,              # Content File Path (String)
 
 #file_paths = ['Gambar\komputer mainframe1.jpg','Gambar\shopping after.jpg']
 #file_paths = 'Gambar\gambar pdf2.pdf'
-file_paths = "Gambar\komputer mainframe1.jpg"
+# file_paths = "Gambar\komputer mainframe1.jpg"
 
-results = watermark_image(file_paths,
-                    text='Sample Watermark',font_type='hershey script simplex',
-                    font_color='red',position_str='bawah kanan',opacity=0.3,output_format='png',
-                    enchance_quality=True,
-                    #logo_path=None)
-                    logo_path='Gambar\\watermark logo.png')
+# results = watermark_image(file_paths,
+#                     text='Sample Watermark',font_type='hershey script simplex',
+#                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='png',
+#                     enchance_quality=True,
+#                     #logo_path=None)
+#                     logo_path='Gambar\\watermark logo.png')
 
-print(results)
+# print(results)
 
 #file_paths = ['Gambar\SampleVideo_1280x720_1mb.mp4','Gambar\file_example_MP4_1920_18MG.mp4']
 #file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
-# file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
+file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
 
-# results = watermark_video(file_paths,
-#                     text='Sample Watermark',font_type='hershey script simplex',
-#                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='mp4',
-#                     enchance_quality=True,
-#                     logo_path='')
-#                     #logo_path='Gambar\watermark logo.png')
+results = watermark_video(file_paths,
+                    text='Sample Watermark',font_type='hershey script simplex',
+                    font_color='red',position_str='bawah kanan',opacity=0.3,output_format='mp4',
+                    enchance_quality=True,
+                    logo_path='')
+                    #logo_path='Gambar\watermark logo.png')
 
-# print(results)
+print(results)
 
 # def select_files():
 #     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong

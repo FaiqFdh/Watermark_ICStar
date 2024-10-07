@@ -412,6 +412,12 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
     output_files = []  # Inisialisasi list untuk menyimpan hasil output
     
     try:
+        # Cek apakah file path ada
+        if not os.path.exists(file_paths):
+            output_files.append(file_paths)
+            return output_files + [f"Error While Embedding Watermark: file tidak ditemukan"] 
+            #return [f"Error: File tidak ditemukan di path: {file_paths}"]  # Jika file path tidak ditemukan
+
         # Cek apakah file yang diupload adalah PDF
         if file_paths.lower().endswith('.pdf'):
             # Konversi PDF ke gambar
@@ -562,8 +568,8 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
 
     except Exception as e:
         #return f"Error While Embedding Watermark: {str(e)}", output_files  # Kembalikan pesan error dan daftar file output jika ada
-        #return output_files + [f"Error While Embedding Watermark: {str(e)}"]  # Mengembalikan output_files ditambah pesan kesalahan
-        return output_files + ['Error While Embedding Watermark'] # Kembalikan pesan error dan daftar file output jika ada
+        return output_files + [f"Error While Embedding Watermark: {str(e)}"]  # Mengembalikan output_files ditambah pesan kesalahan
+        #return output_files + ['Error While Embedding Watermark'] # Kembalikan pesan error dan daftar file output jika ada
 
 # file_paths = 'Gambar\komputer mainframe1.jpg'
 
