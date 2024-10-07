@@ -91,12 +91,27 @@ def preprocess_logo(logo, image_size, scale_factor=0.2):
 def remove_background(logo):
     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
+    
+    # Membuat mask berdasarkan thresholding
     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+    
+    # Menggunakan mask untuk menghilangkan latar belakang
     logo = cv2.bitwise_and(logo, logo, mask=mask)
-    b, g, r = cv2.split(logo)
-    alpha_channel = mask
-    logo_rgba = cv2.merge((b, g, r, alpha_channel))
+
+    # Cek jumlah saluran logo
+    if logo.shape[2] == 3:  # RGB
+        # Jika logo adalah RGB, buat alpha channel dengan nilai penuh
+        b, g, r = cv2.split(logo)
+        alpha_channel = np.ones(b.shape, dtype=b.dtype) * 255  # Alpha channel penuh
+        logo_rgba = cv2.merge((b, g, r, alpha_channel))
+    elif logo.shape[2] == 4:  # RGBA
+        # Jika logo sudah memiliki alpha channel
+        b, g, r, a = cv2.split(logo)
+        # Gunakan alpha channel yang sudah ada
+        logo_rgba = cv2.merge((b, g, r, mask))
+
     return logo_rgba
+
 
 def add_text_watermark(image, text, position_str,font_type='hershey simplex', font_color=(255, 255, 255), scale_factor=0.3, thickness=2, opacity=0.6):
     """Menambahkan watermark teks ke gambar dengan skala otomatis pada posisi yang ditentukan."""
@@ -147,8 +162,11 @@ def add_text_watermark(image, text, position_str,font_type='hershey simplex', fo
 
 def add_logo_watermark(image, logo, position_str, opacity):
     """Menambahkan watermark logo ke gambar dengan transparansi di posisi yang ditentukan."""
-    if logo is None:
-        raise ValueError("Logo tidak ditemukan.")
+
+    # logo = cv2.imread(logo, cv2.IMREAD_UNCHANGED)
+
+    # if logo is None:
+    #     raise ValueError("Logo tidak ditemukan.")
 
     # Dapatkan posisi berdasarkan input string
     position = get_watermark_position(image, logo, position_str)
@@ -526,7 +544,7 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                 if logo_path is None:
                     raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
                 logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
-                
+                #logo=logo_path
                 if position_str == 'auto':
                     image_with_watermark = add_watermark_with_auto_position(
                         preprocessed_image, logo, watermark_type='logo', opacity=opacity
@@ -554,6 +572,7 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
     except Exception as e:
         output_files[1] = f"Error While Embedding Watermark: {str(e)}"
         return output_files
+
 
 #Set
 """
