@@ -3,10 +3,10 @@ from tkinter import Tk
 from tkinter.filedialog import askopenfilenames
 
 # Fungsi untuk memilih file menggunakan tkinter
-def select_files():
-    Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
-    file_paths = askopenfilenames(title="Pilih File", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("Video files", "*.mp4 *.avi *.mov"), ("PDF files", "*.pdf")])
-    return file_paths
+# def select_files():
+#     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
+#     file_paths = askopenfilenames(title="Pilih File", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("Video files", "*.mp4 *.avi *.mov"), ("PDF files", "*.pdf")])
+#     return file_paths
 
 def watermark_image(file_path,          # Content File Path (String)
                     logo_path=None,     # Watermark File Path (String)
@@ -105,12 +105,12 @@ def watermark_video(file_path,              # Content File Path (String)
 #                     logo_path='Gambar\\watermark logo.png')
 
 # print(results)
-#file_paths = 'Gambar\\Content File.png'
+file_paths = 'Gambar\\Content File.png'
 #file_paths = "Gambar\komputer mainframe1.jpg"
-file_paths = 'Gambar\shopping after.jpg'
+#file_paths = 'Gambar\shopping after.jpg'
 results = watermark_image(file_paths,
-                          #logo_path='Gambar\Watermark File.png',
-                          logo_path='Gambar\\watermark logo.png',
+                          logo_path='Gambar\Watermark File.png',
+                          #logo_path='Gambar\\watermark logo.png',
                             text='',
                             font_type='',
                             font_color='',
