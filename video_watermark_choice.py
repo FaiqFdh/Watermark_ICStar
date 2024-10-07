@@ -82,21 +82,24 @@ def remove_background_video(logo):
     
     # Membuat mask berdasarkan thresholding
     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
-    
+
     # Menggunakan mask untuk menghilangkan latar belakang
-    logo = cv2.bitwise_and(logo, logo, mask=mask)
+    logo_with_mask = cv2.bitwise_and(logo, logo, mask=mask)
 
     # Cek jumlah saluran logo
     if logo.shape[2] == 3:  # RGB
         # Jika logo adalah RGB, buat alpha channel dengan nilai penuh
         b, g, r = cv2.split(logo)
-        alpha_channel = np.ones(b.shape, dtype=b.dtype) * 255  # Alpha channel penuh
+        alpha_channel = np.zeros(b.shape, dtype=b.dtype)  # Alpha channel kosong
+        alpha_channel[mask > 0] = 255  # Set alpha channel menjadi 255 di area yang tidak putih
         logo_rgba = cv2.merge((b, g, r, alpha_channel))
     elif logo.shape[2] == 4:  # RGBA
         # Jika logo sudah memiliki alpha channel
         b, g, r, a = cv2.split(logo)
-        # Gunakan alpha channel yang sudah ada
-        logo_rgba = cv2.merge((b, g, r, mask))
+        # Buat mask baru yang berdasarkan warna putih
+        new_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)[1]  # Mask untuk area putih
+        a[new_mask == 255] = 0  # Set alpha channel menjadi 0 di area putih
+        logo_rgba = cv2.merge((b, g, r, a))
 
     return logo_rgba
 
