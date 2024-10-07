@@ -179,6 +179,9 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
     else:
         raise ValueError(f"Tipe format output '{output_format}' tidak didukung. Pilih antara 'mp4', 'avi', atau 'mov'.")
 
+    # Inisialisasi hasil
+    output_result = [None, '']  # Format [Output Video Path, Error Message]
+
     try:
         # Coba buka video input
         cap = cv2.VideoCapture(video_path)
@@ -192,8 +195,9 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
 
         # Generate output filename di folder yang sama dengan file kode
         filename = os.path.basename(video_path)  # Ambil nama file dari path input
-        output_video_path = f"Watermarked{filename.split('.')[0]}.{output_format}"  # Hanya nama file, tanpa direktori
+        output_video_path = f"Watermarked_{filename.split('.')[0]}.{output_format}"  # Hanya nama file, tanpa direktori
         output_video_paths.append(output_video_path)
+        output_result[0] = output_video_path  # Set output path
 
         # Buat video writer
         out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
@@ -253,19 +257,13 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
 
     except Exception as e:
         # Jika terjadi error, tambahkan pesan error
-        error_messages.append(video_path)
-        error_messages.append(f"Error while embedding watermark: {str(e)}")
-        #error_messages.append(f"Error while embedding watermark")
-        
+        output_result[1] = f"Error while embedding watermark: {str(e)}"
+        output_result[0] = video_path  # Set path video input yang gagal sebagai output
+
     cv2.destroyAllWindows()
 
-    # Return daftar video output yang berhasil dihasilkan, atau error jika ada
-    if error_messages:
-        #combined_list = output_video_paths + error_messages  # Gabungkan output video dengan pesan error
-        #return error_messages + ['Error while embedding watermark']
-        return error_messages  
-    else:
-        return output_video_paths + ['']  # Return output video paths yang berhasil dihasilkan
+    return output_result  # Return output result yang berisi [Output Video Path, Error Message]
+
 
 #video_path = 'Gambar\SampleVideo_1280x720_1mb.mp4'  # Ganti dengan path video yang sesuai
 #video_path = 'Gambar\file_example_MP4_1920_18MG.mp4'

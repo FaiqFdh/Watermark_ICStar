@@ -95,7 +95,7 @@ def watermark_video(file_path,              # Content File Path (String)
 
 #file_paths = ['Gambar\komputer mainframe1.jpg','Gambar\shopping after.jpg']
 #file_paths = 'Gambar\gambar pdf2.pdf'
-# file_paths = "Gambar\komputer mainframe1.jpg"
+file_paths = "Gambar\komputer mainframe1.jpg"
 
 # results = watermark_image(file_paths,
 #                     text='Sample Watermark',font_type='hershey script simplex',
@@ -106,9 +106,22 @@ def watermark_video(file_path,              # Content File Path (String)
 
 # print(results)
 
+results = watermark_image(file_paths,
+                          logo_path='Gambar\\watermark logo.png',
+                            text='',
+                            font_type='',
+                            font_color='',
+                            position_str='bawah kanan',
+                            opacity=0.30,
+                            output_format='jpg',
+                            enchance_quality=True)
+                            #logo_path=None)
+
+print(results)
+
 #file_paths = ['Gambar\SampleVideo_1280x720_1mb.mp4','Gambar\file_example_MP4_1920_18MG.mp4']
-#file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
-file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
+file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
+#file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
 
 results = watermark_video(file_paths,
                     text='Sample Watermark',font_type='hershey script simplex',
