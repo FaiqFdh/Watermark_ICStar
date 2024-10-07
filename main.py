@@ -95,7 +95,7 @@ def watermark_video(file_path,              # Content File Path (String)
 
 #file_paths = ['Gambar\komputer mainframe1.jpg','Gambar\shopping after.jpg']
 #file_paths = 'Gambar\gambar pdf2.pdf'
-file_paths = "Gambar\komputer mainframe1.jpg"
+#file_paths = "Gambar\komputer mainframe1.jpg"
 
 # results = watermark_image(file_paths,
 #                     text='Sample Watermark',font_type='hershey script simplex',
@@ -105,9 +105,10 @@ file_paths = "Gambar\komputer mainframe1.jpg"
 #                     logo_path='Gambar\\watermark logo.png')
 
 # print(results)
-
+file_paths = 'Gambar\\Content File.png'
 results = watermark_image(file_paths,
-                          logo_path='Gambar\\watermark logo.png',
+                          logo_path='Gambar\Watermark File.png',
+                          #logo_path='Gambar\\watermark logo.png',
                             text='',
                             font_type='',
                             font_color='',
@@ -119,16 +120,71 @@ results = watermark_image(file_paths,
 
 print(results)
 
+# import cv2
+# logo_path='Gambar\\Watermark File.png'
+# logo = cv2.imread(logo_path, cv2.IMREAD_UNCHANGED)
+# if logo is None:
+#     print("Gambar logo tidak dapat dibaca. Pastikan format dan path benar.")
+# else:
+#     print("Bentuk logo:", logo.shape)
+
+# import numpy as np
+
+# # Mengambil channel alpha
+# alpha_channel = logo[:, :, 3]
+
+# # Cek nilai minimum dan maksimum channel alpha
+# min_alpha = np.min(alpha_channel)
+# max_alpha = np.max(alpha_channel)
+
+# print(f"Minimum alpha: {min_alpha}, Maksimum alpha: {max_alpha}")
+
+# logo_path='Gambar\watermark logo.png'
+# logo = cv2.imread(logo_path, cv2.IMREAD_UNCHANGED)
+# if logo is None:
+#     print("Gambar logo tidak dapat dibaca. Pastikan format dan path benar.")
+# else:
+#     print("Bentuk logo:", logo.shape)
+
+# import numpy as np
+
+# # Mengambil channel alpha
+# alpha_channel = logo[:, :, 2]
+
+# # Cek nilai minimum dan maksimum channel alpha
+# min_alpha = np.min(alpha_channel)
+# max_alpha = np.max(alpha_channel)
+
+# print(f"Minimum alpha: {min_alpha}, Maksimum alpha: {max_alpha}")
+
+
 #file_paths = ['Gambar\SampleVideo_1280x720_1mb.mp4','Gambar\file_example_MP4_1920_18MG.mp4']
+#file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
+#file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
+
+# results = watermark_video(file_paths,
+#                     text='Sample Watermark',font_type='hershey script simplex',
+#                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='mp4',
+#                     enchance_quality=True,
+#                     logo_path='')
+#                     #logo_path='Gambar\watermark logo.png')
+
+# print(results)
+
 file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
 #file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
 
-results = watermark_video(file_paths,
-                    text='Sample Watermark',font_type='hershey script simplex',
-                    font_color='red',position_str='bawah kanan',opacity=0.3,output_format='mp4',
-                    enchance_quality=True,
-                    logo_path='')
-                    #logo_path='Gambar\watermark logo.png')
+results = watermark_image(file_paths,
+                          logo_path='Gambar\Watermark File.png',
+                          #logo_path='Gambar\\watermark logo.png',
+                            text='',
+                            font_type='',
+                            font_color='',
+                            position_str='bawah kanan',
+                            opacity=0.30,
+                            output_format='mp4',
+                            enchance_quality=True)
+                            #logo_path=None)
 
 print(results)
 
