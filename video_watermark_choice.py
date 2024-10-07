@@ -79,7 +79,10 @@ def preprocess_logo_video(logo, scale_factor):
 def remove_background_video(logo):
     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
-    
+
+    # Cek untuk background hitam
+    is_black_background = np.mean(gray) < 50  # Threshold untuk mendeteksi latar belakang hitam
+
     # Membuat mask berdasarkan thresholding
     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
 
@@ -101,7 +104,38 @@ def remove_background_video(logo):
         a[new_mask == 255] = 0  # Set alpha channel menjadi 0 di area putih
         logo_rgba = cv2.merge((b, g, r, a))
 
+    # Jika latar belakang hitam, set alpha channel menjadi 0 di area hitam
+    if is_black_background:
+        alpha_channel[gray < 50] = 0  # Set alpha channel menjadi 0 di area hitam
+
     return logo_rgba
+
+# def remove_background_video(logo):
+#     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
+#     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
+    
+#     # Membuat mask berdasarkan thresholding
+#     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+
+#     # Menggunakan mask untuk menghilangkan latar belakang
+#     logo_with_mask = cv2.bitwise_and(logo, logo, mask=mask)
+
+#     # Cek jumlah saluran logo
+#     if logo.shape[2] == 3:  # RGB
+#         # Jika logo adalah RGB, buat alpha channel dengan nilai penuh
+#         b, g, r = cv2.split(logo)
+#         alpha_channel = np.zeros(b.shape, dtype=b.dtype)  # Alpha channel kosong
+#         alpha_channel[mask > 0] = 255  # Set alpha channel menjadi 255 di area yang tidak putih
+#         logo_rgba = cv2.merge((b, g, r, alpha_channel))
+#     elif logo.shape[2] == 4:  # RGBA
+#         # Jika logo sudah memiliki alpha channel
+#         b, g, r, a = cv2.split(logo)
+#         # Buat mask baru yang berdasarkan warna putih
+#         new_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)[1]  # Mask untuk area putih
+#         a[new_mask == 255] = 0  # Set alpha channel menjadi 0 di area putih
+#         logo_rgba = cv2.merge((b, g, r, a))
+
+#     return logo_rgba
 
 def add_logo_watermark_video(frame, logo, position, opacity=1.0):
     """Menambahkan watermark logo ke frame dengan transparansi di posisi yang ditentukan."""
