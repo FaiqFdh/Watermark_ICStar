@@ -86,12 +86,43 @@ def preprocess_logo(logo, image_size, scale_factor=0.2):
     scale_size = int(min(image_size) * scale_factor)
     logo = cv2.resize(logo, (scale_size, scale_size), interpolation=cv2.INTER_AREA)
     logo_rgba = remove_background(logo)
+
     return logo_rgba
+
+# def remove_background(logo):
+#     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
+#     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
+    
+#     # Membuat mask berdasarkan thresholding
+#     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
+
+#     # Menggunakan mask untuk menghilangkan latar belakang
+#     logo_with_mask = cv2.bitwise_and(logo, logo, mask=mask)
+
+#     # Cek jumlah saluran logo
+#     if logo.shape[2] == 3:  # RGB
+#         # Jika logo adalah RGB, buat alpha channel dengan nilai penuh
+#         b, g, r = cv2.split(logo)
+#         alpha_channel = np.zeros(b.shape, dtype=b.dtype)  # Alpha channel kosong
+#         alpha_channel[mask > 0] = 255  # Set alpha channel menjadi 255 di area yang tidak putih
+#         logo_rgba = cv2.merge((b, g, r, alpha_channel))
+#     elif logo.shape[2] == 4:  # RGBA
+#         # Jika logo sudah memiliki alpha channel
+#         b, g, r, a = cv2.split(logo)
+#         # Buat mask baru yang berdasarkan warna putih
+#         new_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)[1]  # Mask untuk area putih
+#         a[new_mask == 255] = 0  # Set alpha channel menjadi 0 di area putih
+#         logo_rgba = cv2.merge((b, g, r, a))
+
+#     return logo_rgba
 
 def remove_background(logo):
     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
-    
+
+    # Cek untuk background hitam
+    is_black_background = np.mean(gray) < 50  # Threshold untuk mendeteksi latar belakang hitam
+
     # Membuat mask berdasarkan thresholding
     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
 
@@ -113,10 +144,11 @@ def remove_background(logo):
         a[new_mask == 255] = 0  # Set alpha channel menjadi 0 di area putih
         logo_rgba = cv2.merge((b, g, r, a))
 
+    # Jika latar belakang hitam, set alpha channel menjadi 0 di area hitam
+    if is_black_background:
+        alpha_channel[gray < 50] = 0  # Set alpha channel menjadi 0 di area hitam
+
     return logo_rgba
-
-
-
 
 def add_text_watermark(image, text, position_str,font_type='hershey simplex', font_color=(255, 255, 255), scale_factor=0.3, thickness=2, opacity=0.6):
     """Menambahkan watermark teks ke gambar dengan skala otomatis pada posisi yang ditentukan."""
@@ -432,7 +464,7 @@ def remove_white_background(image, margin=0):
         return image
 
 def process_multiple_files(file_paths, watermark_type=None, enchance_quality=None, font_type=None, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
-    output_files = ['Watermarked File Path', '']  # Inisialisasi list strict dengan 2 item: [file_path, error_message]
+    output_files = [file_paths, '']  # Inisialisasi list strict dengan 2 item: [file_path, error_message]
     
     try:
         # Cek apakah file path ada

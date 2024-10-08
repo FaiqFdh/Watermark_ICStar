@@ -210,7 +210,7 @@ def get_watermark_position_video(frame, watermark, position_str):
 
 def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='mp4', **kwargs):
     """Menambahkan watermark ke video berdasarkan jenis watermark yang dipilih."""
-    output_result = ['Watermarked Video Path', '']  # Inisialisasi list strict dengan 2 item: [file_path, error_message]
+    output_result = [video_path, '']  # Inisialisasi list strict dengan 2 item: [file_path, error_message]
 
     # Tentukan codec video berdasarkan format output
     if output_format == 'mp4':

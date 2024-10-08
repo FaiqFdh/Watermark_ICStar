@@ -105,22 +105,22 @@ def watermark_video(file_path,              # Content File Path (String)
 #                     logo_path='Gambar\\watermark logo.png')
 
 # print(results)
-file_paths = 'Gambar\\Content File.png'
+#file_paths = 'Gambar\\Content File.png'
 #file_paths = "Gambar\komputer mainframe1.jpg"
-#file_paths = 'Gambar\shopping after.jpg'
-results = watermark_image(file_paths,
-                          logo_path='Gambar\Watermark File.png',
-                          #logo_path='Gambar\\watermark logo.png',
-                            text='',
-                            font_type='',
-                            font_color='',
-                            position_str='bawah kanan',
-                            opacity=0.30,
-                            output_format='jpg',
-                            enchance_quality=True)
-                            #logo_path=None)
+# file_paths = 'Gambar\shopping after.jpg'
+# results = watermark_image(file_paths,
+#                           logo_path='Gambar\Watermark File.png',
+#                           #logo_path='Gambar\\watermark logo.png',
+#                             text='',
+#                             font_type='',
+#                             font_color='',
+#                             position_str='bawah kanan',
+#                             opacity=0.30,
+#                             output_format='jpg',
+#                             enchance_quality=True)
+#                             #logo_path=None)
 
-print(results)
+# print(results)
 
 # import cv2
 # logo_path='Gambar\\Watermark File.png'
@@ -173,22 +173,22 @@ print(results)
 
 # print(results)
 
-file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
+#file_paths = 'Gambar\SampleVideo_1280x720_1mb.mp4'
 #file_paths = 'Gambar\file_example_MP4_1920_18MG.mp4'
 
-results = watermark_image(file_paths,
-                          logo_path='Gambar\Watermark File.png',
-                          #logo_path='Gambar\\watermark logo.png',
-                            text='',
-                            font_type='',
-                            font_color='',
-                            position_str='bawah kanan',
-                            opacity=0.30,
-                            output_format='mp4',
-                            enchance_quality=True)
-                            #logo_path=None)
+# results = watermark_image(file_paths,
+#                           logo_path='Gambar\Watermark File.png',
+#                           #logo_path='Gambar\\watermark logo.png',
+#                             text='',
+#                             font_type='',
+#                             font_color='',
+#                             position_str='bawah kanan',
+#                             opacity=0.30,
+#                             output_format='mp4',
+#                             enchance_quality=True)
+#                             #logo_path=None)
 
-print(results)
+# print(results)
 
 # def select_files():
 #     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
