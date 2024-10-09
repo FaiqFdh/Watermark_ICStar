@@ -210,7 +210,7 @@ def get_watermark_position_video(frame, watermark, position_str):
 
 def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='mp4', **kwargs):
     """Menambahkan watermark ke video berdasarkan jenis watermark yang dipilih."""
-    output_result = [video_path, '']  # Inisialisasi list strict dengan 2 item: [file_path, error_message]
+    output_result = [os.path.abspath(video_path), '']  # Inisialisasi list strict dengan 2 item: [file_path, error_message]
 
     # Tentukan codec video berdasarkan format output
     if output_format == 'mp4':
@@ -238,7 +238,9 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
         # Generate output filename di folder yang sama dengan file kode
         filename = os.path.basename(video_path)  # Ambil nama file dari path input
         output_video_path = f"Watermarked{filename.split('.')[0]}.{output_format}"  # Hanya nama file, tanpa direktori
+        output_video_path = os.path.abspath(output_video_path)  # Buat menjadi absolute path
         output_result[0] = output_video_path  # Set output path
+        #output_result[0] = output_video_path  # Set output path
 
         # Buat video writer
         out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
@@ -295,7 +297,7 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
     except Exception as e:
         # Jika terjadi error, tambahkan pesan error
         output_result[1] = f"Error while embedding watermark: {str(e)}"
-        output_result[0] = video_path  # Set path video input yang gagal sebagai output
+        output_result[0] = os.path.abspath(video_path)# Set path video input yang gagal sebagai output
 
     cv2.destroyAllWindows()
 
