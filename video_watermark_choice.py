@@ -254,6 +254,17 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
                 position_str = kwargs.get('position_str', 'kanan bawah')
                 opacity = kwargs.get('opacity', 0.6)
 
+                # Cek dan konversi logo jika perlu (JPG/JPEG ke PNG)
+                if logo_path.lower().endswith(('.jpg', '.jpeg')):
+                    logo_image = cv2.imread(logo_path)
+                    if logo_image is None:
+                        output_result[1] = f"Logo tidak dapat dibuka: {logo_path}"
+                        cap.release()
+                        return output_result
+                    # Simpan logo sebagai PNG sementara
+                    logo_path = logo_path.replace('.jpg', '.png').replace('.jpeg', '.png')
+                    cv2.imwrite(logo_path, logo_image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+
                 # Load logo dan preprocess
                 logo = cv2.imread(logo_path, cv2.IMREAD_UNCHANGED)
                 if logo is None:

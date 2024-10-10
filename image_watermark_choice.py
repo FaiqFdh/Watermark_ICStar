@@ -510,6 +510,18 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                 elif watermark_type == 'logo':
                     if logo_path is None:
                         raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
+                    
+                    # Cek apakah logo bukan PNG, jika iya, konversi ke PNG
+                    logo_ext = os.path.splitext(logo_path)[1].lower()
+                    if logo_ext in ['.jpg', '.jpeg']:
+                        logo_image = cv2.imread(logo_path)
+                        if logo_image is not None:
+                            converted_logo_path = logo_path.replace(logo_ext, '.png')
+                            cv2.imwrite(converted_logo_path, logo_image)
+                            logo_path = converted_logo_path  # Set logo_path ke file PNG baru
+                        else:
+                            raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
+                    
                     logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=open_cv_image.shape[:2], scale_factor=scale_factor)
                     
                     if position_str == 'auto':
@@ -583,7 +595,20 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
             elif watermark_type == 'logo':
                 if logo_path is None:
                     raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
+                
+                 # Cek apakah logo bukan PNG, jika iya, konversi ke PNG
+                logo_ext = os.path.splitext(logo_path)[1].lower()
+                if logo_ext in ['.jpg', '.jpeg']:
+                    logo_image = cv2.imread(logo_path)
+                    if logo_image is not None:
+                        converted_logo_path = logo_path.replace(logo_ext, '.png')
+                        cv2.imwrite(converted_logo_path, logo_image)
+                        logo_path = converted_logo_path  # Set logo_path ke file PNG baru
+                    else:
+                        raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
+                    
                 logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
+                
                 #logo=logo_path
                 if position_str == 'auto':
                     image_with_watermark = add_watermark_with_auto_position(
