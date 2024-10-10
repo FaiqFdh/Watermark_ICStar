@@ -245,10 +245,19 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
         # Buat video writer
         out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
 
+        enhance_quality = kwargs.get('enhance_quality',True)
+
         # Proses frame video
         ret, frame = cap.read()
         while ret:
             # Tambahkan watermark berdasarkan jenis yang dipilih
+            # Proses denoise dan sharpening frame jika diperlukan
+    
+            if enhance_quality:
+                #print("preprocess")
+                frame = denoise_frame(frame)
+                frame = sharpen_frame(frame)
+            #print('Tidak Preprocess')
             if watermark_type == 'logo':
                 logo_path = kwargs.get('logo_path')
                 position_str = kwargs.get('position_str', 'kanan bawah')
