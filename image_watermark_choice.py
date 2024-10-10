@@ -484,13 +484,15 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                 if enchance_quality:
                     open_cv_image = preprocess_image(open_cv_image)
 
-                image_with_watermark = open_cv_image
+                #image_with_watermark = open_cv_image
 
                 # Watermark teks
                 if watermark_type == 'text':
                     font_color = get_color_from_string(font_color)
                     if text is None:
-                        raise ValueError("Text harus disediakan untuk watermark jenis teks.")
+                        #raise ValueError("Text harus disediakan untuk watermark jenis teks.")
+                        output_files[1] = "Error While Embedding Watermark: Text harus disediakan untuk watermark jenis teks."
+                        return output_files
                     
                     if position_str == 'luar gambar':
                         image_with_watermark = add_watermark_below_image(
@@ -509,7 +511,9 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                 # Watermark logo
                 elif watermark_type == 'logo':
                     if logo_path is None:
-                        raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
+                        #raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
+                        output_files[1] = "Error While Embedding Watermark: Path logo harus disediakan untuk watermark jenis logo."
+                        return output_files
                     
                     # Cek apakah logo bukan PNG, jika iya, konversi ke PNG
                     logo_ext = os.path.splitext(logo_path)[1].lower()
@@ -520,7 +524,9 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                             cv2.imwrite(converted_logo_path, logo_image)
                             logo_path = converted_logo_path  # Set logo_path ke file PNG baru
                         else:
-                            raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
+                            #raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
+                            output_files[1] = "Error While Embedding Watermark: Logo tidak dapat dibuka"
+                            return output_files
                     
                     logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=open_cv_image.shape[:2], scale_factor=scale_factor)
                     
@@ -547,7 +553,9 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                 elif output_format.lower() == 'png':
                     cv2.imwrite(output_filename, image_with_watermark)
                 else:
-                    raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
+                    #raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
+                    output_files[1] = "Error While Embedding Watermark: Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'."
+                    return output_files
 
             if output_format.lower() == 'pdf':
                 pdf_output_filename = os.path.join(f'Watermarked{os.path.basename(file_paths)}')
@@ -567,16 +575,19 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                 return output_files
 
             if enchance_quality:
+                #print("preproces")
                 preprocessed_image = preprocess_image(image)
             else:
                 preprocessed_image = image
 
-            image_with_watermark = preprocessed_image
+            #image_with_watermark = preprocessed_image
 
             if watermark_type == 'text':
                 font_color = get_color_from_string(font_color)
                 if text is None:
-                    raise ValueError("Text harus disediakan untuk watermark jenis teks.")
+                    #raise ValueError("Text harus disediakan untuk watermark jenis teks.")
+                    output_files[1] = "Error While Embedding Watermark: Text harus disediakan untuk watermark jenis teks."
+                    return output_files
               
                 if position_str == 'luar gambar':
                     image_with_watermark = add_watermark_below_image(
@@ -594,7 +605,9 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
 
             elif watermark_type == 'logo':
                 if logo_path is None:
-                    raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
+                    #raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
+                    output_files[1] = "Error While Embedding Watermark: Path Logo harus disediakan untuk watermark jenis logo."
+                    return output_files
                 
                  # Cek apakah logo bukan PNG, jika iya, konversi ke PNG
                 logo_ext = os.path.splitext(logo_path)[1].lower()
@@ -605,7 +618,9 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                         cv2.imwrite(converted_logo_path, logo_image)
                         logo_path = converted_logo_path  # Set logo_path ke file PNG baru
                     else:
-                        raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
+                        #raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
+                        output_files[1] = "Error While Embedding Watermark: Logo tidak dapat dibuka"
+                        return output_files
                     
                 logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
                 
@@ -632,7 +647,9 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
             elif output_format.lower() == 'png':
                 cv2.imwrite(output_filename, image_with_watermark)
             else:
-                raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
+                #raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
+                output_files[1] = "Error While Embedding Watermark: Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'."
+                return output_files
 
             return output_files
 
