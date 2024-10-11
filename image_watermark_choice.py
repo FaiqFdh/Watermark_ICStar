@@ -463,7 +463,7 @@ def remove_white_background(image, margin=0):
         # Jika tidak ada kontur, kembalikan gambar asli
         return image
 
-def process_multiple_files(file_paths, watermark_type=None, enchance_quality=None, font_type=None, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
+def process_multiple_files(file_paths, watermark_type=None, enchance_quality=None, font_type=None, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format=None):
     output_files = [os.path.abspath(file_paths), '']  # Inisialisasi list strict dengan 2 item: [file_path, error_message]
      
     try:
@@ -552,6 +552,9 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                     cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
                 elif output_format.lower() == 'png':
                     cv2.imwrite(output_filename, image_with_watermark)
+                elif output_format.lower() == 'pdf':
+                    pdf_output_filename = os.path.join(f'Watermarked{os.path.basename(file_paths)}')
+                    watermarked_images[0].save(pdf_output_filename, save_all=True, append_images=watermarked_images[1:], resolution=300)
                 else:
                     #raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
                     output_files[1] = "Error While Embedding Watermark: Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'."
