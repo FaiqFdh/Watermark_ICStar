@@ -62,14 +62,143 @@ def get_cv2_font(font_name):
     else:
         raise ValueError(f"Font '{font_name}' tidak ditemukan. Harap gunakan salah satu dari font berikut: {list(font_dict.keys())}")
 
+from PIL import Image, ImageDraw, ImageFont
+
+def add_text_watermark(image, text, position_str, font_type='hershey simplex', font_color='red', scale_factor=0.3, thickness=2, opacity=0.6):
+    """Menambahkan watermark teks ke gambar dengan skala otomatis pada posisi yang ditentukan."""
+    image_h, image_w, _ = image.shape
+
+    font_folder = "Font"  # Nama folder untuk font eksternal
+    external_font_used = False  # Flag untuk menentukan apakah font eksternal digunakan
+
+    # # Ubah warna font dari string ke format BGR
+    # font_color = get_color_from_string(font_color)
+
+    # Periksa apakah font termasuk font OpenCV atau eksternal
+    if font_type.lower() in get_cv2_fonts():
+        font = get_cv2_font(font_type)
+        font_scale = scale_factor * min(image_w, image_h) / 150
+        text_size, baseline = cv2.getTextSize(text, font, font_scale, thickness)
+        text_w, text_h = text_size
+    else:
+        # Gunakan font eksternal dari folder Font jika tidak ada di OpenCV
+        external_font_used = True
+        font_path = os.path.join(font_folder, f"{font_type}.ttf")
+        
+        # Cek apakah file font eksternal ada
+        if not os.path.exists(font_path):
+            raise ValueError(f"Font '{font_type}' tidak ditemukan di folder '{font_folder}'. Pastikan file .ttf ada di folder tersebut.")
+        
+        # Menggunakan font eksternal
+        font_scale = int(scale_factor * min(image_w, image_h) / 10)  # Sesuaikan ukuran font
+        font = ImageFont.truetype(font_path, font_scale)
+        
+        # Konversi gambar ke format Pillow untuk mendukung font eksternal
+        pil_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(pil_image)
+        
+        # Menggunakan textbbox untuk mendapatkan ukuran teks
+        text_bbox = draw.textbbox((0, 0), text, font=font)
+        text_w = text_bbox[2] - text_bbox[0]
+        text_h = text_bbox[3] - text_bbox[1]
+        
+    # Menentukan posisi watermark
+    positions = {
+        "atas kanan": (image_w - text_w - 10, text_h + 10),
+        "tengah kanan": (image_w - text_w - 10, (image_h + text_h) // 2),
+        'bawah kanan': (image_w - text_w - 10, image_h - 10),
+        "atas kiri": (10, text_h + 10),
+        'tengah kiri': (10, (image_h + text_h) // 2),
+        'bawah kiri': (10, image_h - 10),
+        'tengah tengah': ((image_w - text_w) // 2, (image_h + text_h) // 2),
+        'atas tengah': ((image_w - text_w) // 2, text_h + 10),
+        'bawah tengah': ((image_w - text_w) // 2, image_h - 10)
+    }
+
+    # Dapatkan posisi awal
+    position = positions.get(position_str.lower(), (image_w - text_w - 10, image_h - 10))
+
+    # Periksa dan sesuaikan posisi agar teks tidak keluar dari batas gambar
+    x, y = position
+    if x + text_w > image_w:  # Jika teks keluar batas kanan gambar
+        x = image_w - text_w - 10
+    if y + text_h > image_h:  # Jika teks keluar batas bawah gambar
+        y = image_h - text_h - 10
+    if x < 0:  # Jika teks keluar batas kiri gambar
+        x = 10
+    if y < 0:  # Jika teks keluar batas atas gambar
+        y = text_h + 10
+
+    position = (x, y)
+
+    if external_font_used:
+        # Ubah warna font ke format RGB untuk Pillow
+        font_color_rgb = font_color[::-1]  # Membalik urutan dari BGR ke RGB
+        
+        # Tambahkan teks ke gambar menggunakan Pillow untuk font eksternal
+        draw.text(position, text, fill=font_color_rgb, font=font)
+        image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+    else:
+        # Buat overlay untuk OpenCV text
+        overlay = image.copy()
+        cv2.putText(overlay, text, position, font, font_scale, font_color, thickness, cv2.LINE_AA)
+        cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image)
+
+    return image
+
+def get_cv2_font(font_name):
+    """Mengembalikan font OpenCV berdasarkan nama."""
+    font_name = font_name.lower()
+    font_dict = {
+        "hershey simplex": cv2.FONT_HERSHEY_SIMPLEX,
+        "hershey plain": cv2.FONT_HERSHEY_PLAIN,
+        "hershey duplex": cv2.FONT_HERSHEY_DUPLEX,
+        "hershey complex": cv2.FONT_HERSHEY_COMPLEX,
+        "hershey triplex": cv2.FONT_HERSHEY_TRIPLEX,
+        "hershey complex small": cv2.FONT_HERSHEY_COMPLEX_SMALL,
+        "hershey script simplex": cv2.FONT_HERSHEY_SCRIPT_SIMPLEX,
+        "hershey script complex": cv2.FONT_HERSHEY_SCRIPT_COMPLEX
+    }
+
+    if font_name in font_dict:
+        return font_dict[font_name]
+    else:
+        raise ValueError(f"Font '{font_name}' tidak ditemukan dalam daftar font OpenCV. Harap gunakan font yang tersedia.")
+
+def get_cv2_fonts():
+    """Mengembalikan daftar font OpenCV yang tersedia."""
+    return {
+        "hershey simplex",
+        "hershey plain",
+        "hershey duplex",
+        "hershey complex",
+        "hershey triplex",
+        "hershey complex small",
+        "hershey script simplex",
+        "hershey script complex"
+    }
+
+# def preprocess_image(image):
+#     """Melakukan preprocessing pada gambar."""
+#     gamma_corrected = adjust_gamma(image, gamma=1.2)
+#     sharpened_image = sharpen_image(gamma_corrected)
+#     return sharpened_image
+
 def preprocess_image(image):
     """Melakukan preprocessing pada gambar."""
-    gamma_corrected = adjust_gamma(image, gamma=1.2)
-    sharpened_image = sharpen_image(gamma_corrected)
+    # Adjust gamma
+    gamma_corrected = adjust_gamma(image, gamma=1.0)
+    # Remove noise
+    denoised_image = remove_noise(gamma_corrected)
+    # Sharpen the image
+    sharpened_image = sharpen_image(denoised_image)
+    # Unblur the image
+    #final_image = unblur_image(sharpened_image)
+    
     return sharpened_image
 
 def adjust_gamma(image, gamma=1.0):
-    """Menerapkan penyesuaian gamma pada gambar."""
+    """Menerapkan penyesuaian gamma pada gambar. Tingkat kecerahan gambar"""
     invGamma = 1.0 / gamma
     table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
     return cv2.LUT(image, table)
@@ -79,6 +208,16 @@ def sharpen_image(image):
     blurred = cv2.GaussianBlur(image, (5, 5), 0)
     sharpened = cv2.addWeighted(image, 1.5, blurred, -0.5, 0)
     return sharpened
+
+def remove_noise(image):
+    """Menghilangkan noise dari gambar menggunakan metode denoising."""
+    return cv2.fastNlMeansDenoisingColored(image, None, h=10, templateWindowSize=7, searchWindowSize=21)
+
+def unblur_image(image):
+    """Mengurangi blur pada gambar menggunakan filter Laplacian."""
+    laplacian_filter = cv2.Laplacian(image, cv2.CV_64F)
+    unblurred = cv2.subtract(image, laplacian_filter.astype(np.uint8))
+    return unblurred
 
 def preprocess_logo(logo, image_size, scale_factor=0.2):
     """Melakukan preprocessing pada logo: mengubah ukuran dan menghilangkan latar belakang."""
@@ -150,52 +289,52 @@ def remove_background(logo):
 
     return logo_rgba
 
-def add_text_watermark(image, text, position_str,font_type='hershey simplex', font_color=(255, 255, 255), scale_factor=0.3, thickness=2, opacity=0.6):
-    """Menambahkan watermark teks ke gambar dengan skala otomatis pada posisi yang ditentukan."""
-    image_h, image_w, _ = image.shape
+# def add_text_watermark(image, text, position_str,font_type='hershey simplex', font_color=(255, 255, 255), scale_factor=0.3, thickness=2, opacity=0.6):
+#     """Menambahkan watermark teks ke gambar dengan skala otomatis pada posisi yang ditentukan."""
+#     image_h, image_w, _ = image.shape
 
-    font = get_cv2_font(font_type)
+#     font = get_cv2_font(font_type)
     
-    #font = cv2.FONT_HERSHEY_SIMPLEX
+#     #font = cv2.FONT_HERSHEY_SIMPLEX
 
-    # Menentukan ukuran font berdasarkan scale_factor
-    #font_scale = scale_factor * min(image_w, image_h)
-    #font_scale=scale_factor
+#     # Menentukan ukuran font berdasarkan scale_factor
+#     #font_scale = scale_factor * min(image_w, image_h)
+#     #font_scale=scale_factor
 
-    # Menentukan ukuran font berdasarkan scale_factor
-    font_scale = scale_factor * min(image_w, image_h) / 150  # Menyesuaikan dengan ukuran gambar
+#     # Menentukan ukuran font berdasarkan scale_factor
+#     font_scale = scale_factor * min(image_w, image_h) / 150  # Menyesuaikan dengan ukuran gambar
 
-    # Tentukan ukuran teks dan baseline
-    text_size, baseline = cv2.getTextSize(text, font, font_scale, thickness)
-    text_w, text_h = text_size
+#     # Tentukan ukuran teks dan baseline
+#     text_size, baseline = cv2.getTextSize(text, font, font_scale, thickness)
+#     text_w, text_h = text_size
 
-    # Menentukan posisi watermark
-    positions = {
-        "atas kanan" : (image_w - text_w - 10, text_h + 10),               #"kanan atas"
-        "tengah kanan" : (image_w - text_w - 10, (image_h + text_h) // 2),   #"kanan tengah"
-        'bawah kanan' : (image_w - text_w - 10, image_h - 10),              #"kanan bawah"
-        "atas kiri" : (10, text_h + 10),                                  #"kiri atas"
-        'tengah kiri' : (10, (image_h + text_h) // 2),                      #"kiri tengah"
-        'bawah kiri' : (10, image_h - 10),                                 #"kiri bawah"
-        'tengah tengah' : ((image_w - text_w) // 2, (image_h + text_h) // 2), #"Tengah"
-        'atas tengah' : ((image_w - text_w) // 2, text_h + 10),             # Posisi baru: Tengah atas
-        'bawah tengah' : ((image_w - text_w) // 2, image_h - 10)             # Posisi baru: Tengah bawah
-    }
+#     # Menentukan posisi watermark
+#     positions = {
+#         "atas kanan" : (image_w - text_w - 10, text_h + 10),               #"kanan atas"
+#         "tengah kanan" : (image_w - text_w - 10, (image_h + text_h) // 2),   #"kanan tengah"
+#         'bawah kanan' : (image_w - text_w - 10, image_h - 10),              #"kanan bawah"
+#         "atas kiri" : (10, text_h + 10),                                  #"kiri atas"
+#         'tengah kiri' : (10, (image_h + text_h) // 2),                      #"kiri tengah"
+#         'bawah kiri' : (10, image_h - 10),                                 #"kiri bawah"
+#         'tengah tengah' : ((image_w - text_w) // 2, (image_h + text_h) // 2), #"Tengah"
+#         'atas tengah' : ((image_w - text_w) // 2, text_h + 10),             # Posisi baru: Tengah atas
+#         'bawah tengah' : ((image_w - text_w) // 2, image_h - 10)             # Posisi baru: Tengah bawah
+#     }
 
-    # Ambil posisi dari dictionary atau gunakan default
-    position = positions.get(position_str.lower(), (image_w - text_w - 10, image_h - 10))
-    #position = positions.get(position_str, (image_w - text_w - 10, image_h - 10))
+#     # Ambil posisi dari dictionary atau gunakan default
+#     position = positions.get(position_str.lower(), (image_w - text_w - 10, image_h - 10))
+#     #position = positions.get(position_str, (image_w - text_w - 10, image_h - 10))
 
-    # Buat overlay untuk menempatkan teks dengan transparansi
-    overlay = image.copy()
+#     # Buat overlay untuk menempatkan teks dengan transparansi
+#     overlay = image.copy()
 
-    # Menambahkan teks watermark di overlay
-    cv2.putText(overlay, text, position, font, font_scale, font_color, thickness, cv2.LINE_AA)
+#     # Menambahkan teks watermark di overlay
+#     cv2.putText(overlay, text, position, font, font_scale, font_color, thickness, cv2.LINE_AA)
 
-    # Menggabungkan overlay dengan gambar asli menggunakan opacity
-    cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image)
+#     # Menggabungkan overlay dengan gambar asli menggunakan opacity
+#     cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image)
 
-    return image
+#     return image
 
 def add_logo_watermark(image, logo, position_str, opacity):
     """Menambahkan watermark logo ke gambar dengan transparansi di posisi yang ditentukan."""
