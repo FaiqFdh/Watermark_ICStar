@@ -3,6 +3,7 @@ import numpy as np
 import os
 from tkinter import Tk
 from tkinter.filedialog import askopenfilenames
+from PIL import Image, ImageDraw, ImageFont
 
 def get_color_from_string(color_str):
     """Mengambil warna RGB dari input string hex (#RRGGBB) atau nama warna ('red', 'green', 'blue')."""
@@ -147,44 +148,145 @@ def add_logo_watermark_video(frame, logo, position, opacity=1.0):
              (1.0 - logo[:, :, 3] / 255.0 * opacity))
     return frame
 
-def add_text_watermark_video(frame, text, position, font_color,font_type, thickness=2, scale_factor=0.05, opacity=1.0):
+# def add_text_watermark_video(frame, text, position, font_color,font_type, thickness=2, scale_factor=0.05, opacity=1.0):
+#     """Menambahkan watermark teks ke frame dengan transparansi di posisi yang ditentukan."""
+#     font = get_cv2_font(font_type)
+#     #font = cv2.FONT_HERSHEY_SIMPLEX
+#     scale = scale_factor * frame.shape[1] / 1000  # Menyesuaikan ukuran teks
+#     text_size = cv2.getTextSize(text, font, scale, thickness)[0]
+
+#     # Menentukan posisi teks
+#     if position == 'tengah tengah':#Tengah
+#         position = ((frame.shape[1] - text_size[0]) // 2, (frame.shape[0] + text_size[1]) // 2)
+#     elif position == 'atas kanan':#Kanan Atas
+#         position = (frame.shape[1] - text_size[0] - 10, text_size[1] + 10)
+#     elif position == 'bawah kanan':#Kanan Bawah
+#         position = (frame.shape[1] - text_size[0] - 10, frame.shape[0] - 10)
+#     elif position == 'atas kiri':#Kiri Atas
+#         position = (10, text_size[1] + 10)
+#     elif position == 'bawah kiri':#Kiri Bawah
+#         position = (10, frame.shape[0] - 10)
+#     elif position == 'atas tengah':#Tengah Atas
+#         position = ((frame.shape[1] - text_size[0]) // 2, text_size[1] + 10)
+#     elif position == 'bawah tengah':#Tengah Bawah
+#         position = ((frame.shape[1] - text_size[0]) // 2, frame.shape[0] - 10)
+#     elif position == 'tengah kiri':  # Kiri Tengah
+#         position = (10, (frame.shape[0] - text_size[1]) // 2)
+#     elif position == 'tengah kanan':  # Kanan Tengah
+#         position = (frame.shape[1] - text_size[0] - 10, (frame.shape[0] - text_size[1]) // 2)
+#     else:
+#         raise ValueError(f"Posisi '{position}' tidak dikenal.")
+
+#     overlay = frame.copy()
+#     # Memastikan position adalah tuple dengan dua nilai
+#     if isinstance(position, tuple) and len(position) == 2:
+#         cv2.putText(overlay, text, position, font, scale, font_color, thickness, cv2.LINE_AA)
+#     else:
+#         raise ValueError("Posisi harus berupa tuple yang berisi dua nilai (x, y).")
+
+#     # Menggabungkan teks dengan transparansi
+#     cv2.addWeighted(overlay, opacity, frame, 1 - opacity, 0, frame)
+#     return frame
+
+def add_text_watermark_video(frame, text, position, font_color, font_type, thickness=2, scale_factor=0.05, opacity=1.0):
     """Menambahkan watermark teks ke frame dengan transparansi di posisi yang ditentukan."""
-    font = get_cv2_font(font_type)
-    #font = cv2.FONT_HERSHEY_SIMPLEX
+
+    # Coba mendapatkan font OpenCV
+    try:
+        font = get_cv2_font(font_type)
+        use_opencv = True  # Menandakan penggunaan font OpenCV
+    except ValueError:
+        font = None  # Font tidak ditemukan, lanjut ke TTF
+        use_opencv = False
+
     scale = scale_factor * frame.shape[1] / 1000  # Menyesuaikan ukuran teks
-    text_size = cv2.getTextSize(text, font, scale, thickness)[0]
+    text_size = None
+
+    if use_opencv:
+        # Jika font ditemukan di OpenCV
+        text_size = cv2.getTextSize(text, font, scale, thickness)[0]
+    else:
+        # Jika font tidak ditemukan di OpenCV, cari file TTF
+        ttf_font_path = os.path.join('Font', f"{font_type}.ttf")
+        #print(f"Looking for font at: {ttf_font_path}")  # Debug output
+        if os.path.exists(ttf_font_path):
+            #print("Font file found.")  # Debug output
+            # Convert OpenCV image to PIL image
+            pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            draw = ImageDraw.Draw(pil_image)
+            font = ImageFont.truetype(ttf_font_path, int(scale * 20))  # Adjust size as necessary
+            
+            # Get text bounding box with PIL
+            text_size = draw.textbbox((0, 0), text, font=font)
+            text_w = text_size[2] - text_size[0]
+            text_h = text_size[3] - text_size[1]
+        else:
+            raise ValueError(f"Font TTF '{ttf_font_path}' tidak ditemukan.")
 
     # Menentukan posisi teks
-    if position == 'tengah tengah':#Tengah
-        position = ((frame.shape[1] - text_size[0]) // 2, (frame.shape[0] + text_size[1]) // 2)
-    elif position == 'atas kanan':#Kanan Atas
-        position = (frame.shape[1] - text_size[0] - 10, text_size[1] + 10)
-    elif position == 'bawah kanan':#Kanan Bawah
-        position = (frame.shape[1] - text_size[0] - 10, frame.shape[0] - 10)
-    elif position == 'atas kiri':#Kiri Atas
-        position = (10, text_size[1] + 10)
-    elif position == 'bawah kiri':#Kiri Bawah
-        position = (10, frame.shape[0] - 10)
-    elif position == 'atas tengah':#Tengah Atas
-        position = ((frame.shape[1] - text_size[0]) // 2, text_size[1] + 10)
-    elif position == 'bawah tengah':#Tengah Bawah
-        position = ((frame.shape[1] - text_size[0]) // 2, frame.shape[0] - 10)
-    elif position == 'tengah kiri':  # Kiri Tengah
-        position = (10, (frame.shape[0] - text_size[1]) // 2)
-    elif position == 'tengah kanan':  # Kanan Tengah
-        position = (frame.shape[1] - text_size[0] - 10, (frame.shape[0] - text_size[1]) // 2)
-    else:
-        raise ValueError(f"Posisi '{position}' tidak dikenal.")
+    if text_size is not None:
+        if use_opencv:
+            # Jika menggunakan font OpenCV, ambil ukuran teks dari OpenCV
+            text_size = cv2.getTextSize(text, font, scale, thickness)[0]
+        else:
+            # Menggunakan ukuran dari PIL
+            text_size = (text_w, text_h)
 
-    overlay = frame.copy()
-    # Memastikan position adalah tuple dengan dua nilai
-    if isinstance(position, tuple) and len(position) == 2:
-        cv2.putText(overlay, text, position, font, scale, font_color, thickness, cv2.LINE_AA)
-    else:
-        raise ValueError("Posisi harus berupa tuple yang berisi dua nilai (x, y).")
+        # Menentukan posisi berdasarkan parameter
+        if position == 'tengah tengah':  # Tengah
+            position = ((frame.shape[1] - text_size[0]) // 2, (frame.shape[0] + text_size[1]) // 2)
+        elif position == 'atas kanan':  # Kanan Atas
+            position = (frame.shape[1] - text_size[0] - 10, text_size[1] + 10)
+        elif position == 'bawah kanan':  # Kanan Bawah
+            position = (frame.shape[1] - text_size[0] - 10, frame.shape[0] - text_size[1] - 10)
+        elif position == 'atas kiri':  # Kiri Atas
+            position = (10, text_size[1] + 10)
+        elif position == 'bawah kiri':  # Kiri Bawah
+            position = (10, frame.shape[0] - text_size[1] - 10)
+        elif position == 'atas tengah':  # Tengah Atas
+            position = ((frame.shape[1] - text_size[0]) // 2, text_size[1] + 10)
+        elif position == 'bawah tengah':  # Tengah Bawah
+            position = ((frame.shape[1] - text_size[0]) // 2, frame.shape[0] - text_size[1] - 10)
+        elif position == 'tengah kiri':  # Kiri Tengah
+            position = (10, (frame.shape[0] - text_size[1]) // 2)
+        elif position == 'tengah kanan':  # Kanan Tengah
+            position = (frame.shape[1] - text_size[0] - 10, (frame.shape[0] - text_size[1]) // 2)
+        else:
+            raise ValueError(f"Posisi '{position}' tidak dikenal.")
 
-    # Menggabungkan teks dengan transparansi
-    cv2.addWeighted(overlay, opacity, frame, 1 - opacity, 0, frame)
+        # Pastikan posisi teks tidak keluar dari batas gambar
+        x, y = position
+        x = max(0, min(x, frame.shape[1] - text_size[0]))  # Batasi x
+        y = max(text_size[1], min(y, frame.shape[0] - 1))  # Batasi y, pastikan tidak kurang dari tinggi teks
+        position = (x, y)
+
+        overlay = frame.copy()
+
+        # Memastikan position adalah tuple dengan dua nilai
+        if isinstance(position, tuple) and len(position) == 2:
+            if use_opencv:
+                cv2.putText(overlay, text, position, font, scale, font_color, thickness, cv2.LINE_AA)
+            # else:
+            #     # Jika menggunakan TTF, konversi kembali ke PIL untuk menambahkan teks
+            #     draw = ImageDraw.Draw(Image.fromarray(cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB)))
+            #     font_color = font_color[::-1]# Konversi warna ke RGB untuk TTF
+            #     draw.text(position, text, font=font, fill=font_color)
+            #     overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+
+            #     # Menggabungkan teks dengan transparansi
+            # cv2.addWeighted(overlay, opacity, frame, 1 - opacity, 0, frame)
+            else:
+                # Jika menggunakan TTF, tambahkan teks menggunakan pil_image
+                draw = ImageDraw.Draw(pil_image)
+                font_color = font_color[::-1]  # Konversi warna ke RGB untuk TTF
+                draw.text(position, text, font=font, fill=font_color)
+                overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+
+            # Menggabungkan teks dengan transparansi
+            cv2.addWeighted(overlay, opacity, frame, 1 - opacity, 0, frame)
+        else:
+            raise ValueError("Posisi harus berupa tuple yang berisi dua nilai (x, y).")
+
     return frame
 
 

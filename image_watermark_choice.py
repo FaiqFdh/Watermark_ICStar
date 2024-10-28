@@ -42,7 +42,7 @@ def get_color_from_string(color_str):
 
 def get_cv2_font(font_name):
     # Ubah input menjadi huruf kecil dan hilangkan karakter tambahan seperti apostrof
-    font_name = font_name.lower()
+    #font_name = font_name.lower()
     
     # Pemetaan dari string yang diberikan user ke konstanta OpenCV
     font_dict = {
@@ -148,7 +148,7 @@ def add_text_watermark(image, text, position_str, font_type='hershey simplex', f
 
 def get_cv2_font(font_name):
     """Mengembalikan font OpenCV berdasarkan nama."""
-    font_name = font_name.lower()
+    #font_name = font_name.lower()
     font_dict = {
         "hershey simplex": cv2.FONT_HERSHEY_SIMPLEX,
         "hershey plain": cv2.FONT_HERSHEY_PLAIN,
@@ -177,12 +177,6 @@ def get_cv2_fonts():
         "hershey script simplex",
         "hershey script complex"
     }
-
-# def preprocess_image(image):
-#     """Melakukan preprocessing pada gambar."""
-#     gamma_corrected = adjust_gamma(image, gamma=1.2)
-#     sharpened_image = sharpen_image(gamma_corrected)
-#     return sharpened_image
 
 def preprocess_image(image):
     """Melakukan preprocessing pada gambar."""
@@ -228,33 +222,6 @@ def preprocess_logo(logo, image_size, scale_factor=0.2):
 
     return logo_rgba
 
-# def remove_background(logo):
-#     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
-#     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
-    
-#     # Membuat mask berdasarkan thresholding
-#     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
-
-#     # Menggunakan mask untuk menghilangkan latar belakang
-#     logo_with_mask = cv2.bitwise_and(logo, logo, mask=mask)
-
-#     # Cek jumlah saluran logo
-#     if logo.shape[2] == 3:  # RGB
-#         # Jika logo adalah RGB, buat alpha channel dengan nilai penuh
-#         b, g, r = cv2.split(logo)
-#         alpha_channel = np.zeros(b.shape, dtype=b.dtype)  # Alpha channel kosong
-#         alpha_channel[mask > 0] = 255  # Set alpha channel menjadi 255 di area yang tidak putih
-#         logo_rgba = cv2.merge((b, g, r, alpha_channel))
-#     elif logo.shape[2] == 4:  # RGBA
-#         # Jika logo sudah memiliki alpha channel
-#         b, g, r, a = cv2.split(logo)
-#         # Buat mask baru yang berdasarkan warna putih
-#         new_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)[1]  # Mask untuk area putih
-#         a[new_mask == 255] = 0  # Set alpha channel menjadi 0 di area putih
-#         logo_rgba = cv2.merge((b, g, r, a))
-
-#     return logo_rgba
-
 def remove_background(logo):
     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
@@ -288,53 +255,6 @@ def remove_background(logo):
         alpha_channel[gray < 50] = 0  # Set alpha channel menjadi 0 di area hitam
 
     return logo_rgba
-
-# def add_text_watermark(image, text, position_str,font_type='hershey simplex', font_color=(255, 255, 255), scale_factor=0.3, thickness=2, opacity=0.6):
-#     """Menambahkan watermark teks ke gambar dengan skala otomatis pada posisi yang ditentukan."""
-#     image_h, image_w, _ = image.shape
-
-#     font = get_cv2_font(font_type)
-    
-#     #font = cv2.FONT_HERSHEY_SIMPLEX
-
-#     # Menentukan ukuran font berdasarkan scale_factor
-#     #font_scale = scale_factor * min(image_w, image_h)
-#     #font_scale=scale_factor
-
-#     # Menentukan ukuran font berdasarkan scale_factor
-#     font_scale = scale_factor * min(image_w, image_h) / 150  # Menyesuaikan dengan ukuran gambar
-
-#     # Tentukan ukuran teks dan baseline
-#     text_size, baseline = cv2.getTextSize(text, font, font_scale, thickness)
-#     text_w, text_h = text_size
-
-#     # Menentukan posisi watermark
-#     positions = {
-#         "atas kanan" : (image_w - text_w - 10, text_h + 10),               #"kanan atas"
-#         "tengah kanan" : (image_w - text_w - 10, (image_h + text_h) // 2),   #"kanan tengah"
-#         'bawah kanan' : (image_w - text_w - 10, image_h - 10),              #"kanan bawah"
-#         "atas kiri" : (10, text_h + 10),                                  #"kiri atas"
-#         'tengah kiri' : (10, (image_h + text_h) // 2),                      #"kiri tengah"
-#         'bawah kiri' : (10, image_h - 10),                                 #"kiri bawah"
-#         'tengah tengah' : ((image_w - text_w) // 2, (image_h + text_h) // 2), #"Tengah"
-#         'atas tengah' : ((image_w - text_w) // 2, text_h + 10),             # Posisi baru: Tengah atas
-#         'bawah tengah' : ((image_w - text_w) // 2, image_h - 10)             # Posisi baru: Tengah bawah
-#     }
-
-#     # Ambil posisi dari dictionary atau gunakan default
-#     position = positions.get(position_str.lower(), (image_w - text_w - 10, image_h - 10))
-#     #position = positions.get(position_str, (image_w - text_w - 10, image_h - 10))
-
-#     # Buat overlay untuk menempatkan teks dengan transparansi
-#     overlay = image.copy()
-
-#     # Menambahkan teks watermark di overlay
-#     cv2.putText(overlay, text, position, font, font_scale, font_color, thickness, cv2.LINE_AA)
-
-#     # Menggabungkan overlay dengan gambar asli menggunakan opacity
-#     cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image)
-
-#     return image
 
 def add_logo_watermark(image, logo, position_str, opacity):
     """Menambahkan watermark logo ke gambar dengan transparansi di posisi yang ditentukan."""
@@ -430,36 +350,62 @@ def add_watermark_with_auto_position(image, watermark, font_type='hershey simple
         cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image)
 
     elif watermark_type == 'text':
-        font = get_cv2_font(font_type)
-        #font = cv2.FONT_HERSHEY_SIMPLEX
-        text_size, _ = cv2.getTextSize(watermark, font, font_scale, thickness)
-        text_w, text_h = text_size
+        font = None
+        overlay=image.copy()
+        # Try to get OpenCV font
+        try:
+            font = get_cv2_font(font_type)  # Try to get OpenCV font
+            text_size, _ = cv2.getTextSize(watermark, font, font_scale, thickness)
+            
+        except ValueError:
+            font = None  # Font not found, proceed to TTF handling
 
-        optimal_position = find_optimal_position(image, (text_w, text_h))
+        if font is not None:
+            # If font is found in OpenCV
+            text_size, _ = cv2.getTextSize(watermark, font, font_scale, thickness)
+            text_w, text_h = text_size
 
-        # Pastikan posisi tidak keluar dari batas gambar
-        optimal_position = (max(optimal_position[0], 0),
-                            max(optimal_position[1], 0))
-        optimal_position = (min(optimal_position[0], image.shape[1] - text_w),
-                            min(optimal_position[1], image.shape[0] - text_h))
+            optimal_position = find_optimal_position(image, (text_w, text_h))
+            optimal_position = (max(optimal_position[0], 0),
+                                max(optimal_position[1], 0))
+            optimal_position = (min(optimal_position[0], image.shape[1] - text_w),
+                                min(optimal_position[1], image.shape[0] - text_h))
 
-        # Buat overlay untuk menempatkan teks dengan transparansi
-        overlay = image.copy()
+            overlay = image.copy()
+            cv2.putText(overlay, watermark, optimal_position, font, font_scale, font_color, thickness, cv2.LINE_AA)
+        else:
+            # If font not found in OpenCV, check for TTF file
+            ttf_font_path = os.path.join('Font', f"{font_type}.ttf")
+            print(f"Looking for font at: {ttf_font_path}")  # Debug output
+            if os.path.exists(ttf_font_path):
+                #print("Font file found.")  # Debug output
+                pil_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+                draw = ImageDraw.Draw(pil_image)
+                font = ImageFont.truetype(ttf_font_path, int(font_scale * 20))  # Adjust size as necessary
+                
+                # Get text bounding box with PIL
+                text_bbox = draw.textbbox((0, 0), watermark, font=font)
+                text_w = text_bbox[2] - text_bbox[0]
+                text_h = text_bbox[3] - text_bbox[1]
 
-        # Menambahkan teks watermark di overlay
-        cv2.putText(overlay, watermark, optimal_position, font, font_scale, font_color, thickness, cv2.LINE_AA)
+                optimal_position = find_optimal_position(image, (text_w, text_h))
 
-        # Menggabungkan overlay dengan gambar asli menggunakan opacity
+                # Convert font_color to RGB for PIL
+                font_color = font_color[::-1]  # Membalik urutan dari BGR ke RGB
+                draw.text(optimal_position, watermark, font=font, fill=font_color)
+
+                # Convert back to OpenCV image
+                image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+            else:
+                raise ValueError(f"Font TTF '{ttf_font_path}' tidak ditemukan.")
+
+        # Combine overlay with the original image using opacity
         cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image)
 
     return image
 
-# Fungsi untuk menambahkan watermark di bawah gambar dengan bar putih dan scale factor
-def add_watermark_below_image(image, font_type='hershey simplex',text=None, bar_height=50, opacity=0.3, font_color=(0, 0, 0), font_scale=1, thickness=2, scale_factor=0.7):
-    # Load image
-    # image = cv2.imread(image_path)
-    # if image is None:
-    #     raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
+def add_watermark_below_image(image, font_type='hershey simplex', text=None, bar_height=50, opacity=0.3, font_color=(0, 0, 0), font_scale=1, thickness=2, scale_factor=0.7):
+    """Menambahkan watermark teks di bawah gambar dengan opsi untuk font OpenCV dan TTF."""
     
     # Ukuran gambar asli
     h, w, _ = image.shape
@@ -473,108 +419,59 @@ def add_watermark_below_image(image, font_type='hershey simplex',text=None, bar_
     # Sesuaikan skala teks berdasarkan scale factor
     scaled_font_scale = font_scale * scale_factor
 
-    font = get_cv2_font(font_type)
+    font = None
+    # Coba ambil font OpenCV
+    try:
+        font = get_cv2_font(font_type)  # Coba mendapatkan font OpenCV
+        #color_to_use = get_color_from_string(font_color)  # Ambil warna BGR untuk OpenCV font
+    except ValueError:
+        font = None  # Font tidak ditemukan, lanjut ke TTF
 
-    # Posisi teks di kanan bar dengan scale factor
-    #text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scaled_font_scale, thickness)[0]
-    text_size = cv2.getTextSize(text, font, scaled_font_scale, thickness)[0]
-    text_x = w - text_size[0] - 10  # Teks di sebelah kanan dengan padding 10 px
-    text_y = h + (bar_height + text_size[1]) // 2
+    if font is not None:
+        # Jika font ditemukan di OpenCV
+        text_size = cv2.getTextSize(text, font, scaled_font_scale, thickness)[0]
+        text_x = w - text_size[0] - 10  # Teks di sebelah kanan dengan padding 10 px
+        text_y = h + (bar_height + text_size[1]) // 2
 
-    # Buat overlay untuk teks saja
-    text_overlay = combined_image.copy()
+        # Buat overlay untuk teks saja
+        text_overlay = combined_image.copy()
 
-    # Tambahkan teks ke bar putih pada overlay
-    #cv2.putText(text_overlay, text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, scaled_font_scale, font_color, thickness, cv2.LINE_AA)
-    cv2.putText(text_overlay, text, (text_x, text_y), font, scaled_font_scale, font_color, thickness, cv2.LINE_AA)
+        # Tambahkan teks ke bar putih pada overlay
+        cv2.putText(text_overlay, text, (text_x, text_y), font, scaled_font_scale, font_color, thickness, cv2.LINE_AA)
 
-    # Gabungkan teks overlay dengan gambar utama menggunakan opacity
-    cv2.addWeighted(text_overlay[h:, :], opacity, combined_image[h:, :], 1 - opacity, 0, combined_image[h:, :])
+        # Gabungkan teks overlay dengan gambar utama menggunakan opacity
+        cv2.addWeighted(text_overlay[h:, :], opacity, combined_image[h:, :], 1 - opacity, 0, combined_image[h:, :])
+
+    else:
+        # Jika font tidak ditemukan di OpenCV, cari file TTF
+        ttf_font_path = os.path.join('Font', f"{font_type}.ttf")
+        print(f"Looking for font at: {ttf_font_path}")  # Debug output
+        if os.path.exists(ttf_font_path):
+            #print("Font file found.")  # Debug output
+            # Convert OpenCV image to PIL image
+            pil_image = Image.fromarray(cv2.cvtColor(combined_image, cv2.COLOR_BGR2RGB))
+            draw = ImageDraw.Draw(pil_image)
+            font = ImageFont.truetype(ttf_font_path, int(scaled_font_scale * 20))  # Adjust size as necessary
+            
+            # Get text bounding box with PIL
+            text_size = draw.textbbox((0, 0), text, font=font)
+            text_w = text_size[2] - text_size[0]
+            text_h = text_size[3] - text_size[1]
+
+            text_x = w - text_w - 10  # Teks di sebelah kanan dengan padding 10 px
+            text_y = h + (bar_height + text_h) // 2
+
+            # Convert font_color to RGB for PIL
+            font_color = font_color[::-1] 
+            draw.text((text_x, text_y), text, font=font, fill=font_color)
+
+            # Convert back to OpenCV image
+            combined_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+        else:
+            raise ValueError(f"Font TTF '{ttf_font_path}' tidak ditemukan.")
 
     return combined_image
 
-"""
-#Fungsi utama untuk menambahkan watermark dan menyimpan dalam berbagai format
-def main(image_path, watermark_type, output_path, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50,font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
-    # Load image
-    image = cv2.imread(image_path)
-
-    if image is None:
-        raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
-
-    # Preprocess image jika diperlukan
-    preprocessed_image = image  # Placeholder untuk preprocessing jika diperlukan
-
-    # Jika watermark berupa teks
-    if watermark_type == 'text':
-        if text is None:
-            raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-        
-        # Jika posisi adalah -2, gunakan fungsi `add_watermark_below_image`
-        if position_str == -2:
-            image_with_watermark = add_watermark_below_image(
-                image_path=image_path,
-                text=text,
-                bar_height=bar_height,  # Tinggi bar bisa disesuaikan
-                opacity=opacity,
-                font_color=font_color,
-                scale_factor=scale_factor,
-                font_scale=1,  # Anda bisa mengganti skala font sesuai kebutuhan
-                thickness=thickness
-            )
-        elif position_str == -1:
-            # Implementasi watermark otomatis (jika ada)
-            image_with_watermark = add_watermark_with_auto_position(
-                preprocessed_image, text, watermark_type='text', font_color=font_color, thickness=thickness, opacity=opacity
-            )
-        else:
-            # Implementasi watermark di posisi yang ditentukan
-            image_with_watermark = add_text_watermark(
-                preprocessed_image, text, position_str, font_color=font_color, opacity=opacity, thickness=thickness
-            )
-    
-    # Jika watermark berupa logo
-    elif watermark_type == 'logo':
-        if logo_path is None:
-            raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-
-        # Load dan preprocess logo
-        logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
-
-        if position_str == -1:
-            # Implementasi watermark otomatis (jika ada)
-            image_with_watermark = add_watermark_with_auto_position(
-                preprocessed_image, logo, watermark_type='logo', opacity=opacity
-            )
-        else:
-            # Implementasi watermark logo di posisi yang ditentukan
-            image_with_watermark = add_logo_watermark(
-                preprocessed_image, logo, position_str, opacity=opacity
-            )
-
-    # Membuat folder output jika belum ada
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-
-    # Menambahkan "Watermark" pada nama file
-    base_name = os.path.basename(image_path)  # Ambil nama file dari path
-    name, ext = os.path.splitext(base_name)  # Pisahkan nama dan ekstensi
-    output_filename = os.path.join(output_path, f'Watermark_{name}.{output_format}')  # Buat nama file dengan format yang dipilih
-
-    # Simpan gambar dengan format yang dipilih oleh pengguna (JPG/PNG/JPEG)
-    if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-        cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])  # Simpan sebagai JPG atau JPEG
-    elif output_format.lower() == 'png':
-        cv2.imwrite(output_filename, image_with_watermark)  # Simpan sebagai PNG
-    else:
-        raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-    return output_filename
-"""
-
-
-import cv2
-import os
 from pdf2image import convert_from_path
 from PIL import Image
 import numpy as np
@@ -776,6 +673,11 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
                         preprocessed_image, logo, position_str, opacity=opacity
                     )
 
+            # Cek apakah image_with_watermark kosong
+            if image_with_watermark is None or image_with_watermark.size == 0:
+                output_files[1] = "Error: Gambar hasil watermarking kosong."
+                return output_files
+
             base_name = os.path.basename(file_paths)
             name, ext = os.path.splitext(base_name)
             output_filename = os.path.join(f'Watermarked{name}.{output_format}')
@@ -798,749 +700,3 @@ def process_multiple_files(file_paths, watermark_type=None, enchance_quality=Non
     except Exception as e:
         output_files[1] = f"Error While Embedding Watermark: {str(e)}"
         return output_files
-
-
-#Set
-"""
-def process_multiple_files(file_paths, watermark_type=None, enchance_quality=None, font_type=None, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
-    output_files = set()  # Inisialisasi set untuk menyimpan hasil output unik
-    
-    try:
-        # Cek apakah file path ada
-        if not os.path.exists(file_paths):
-            output_files.add(file_paths)
-            output_files.add("")  # Menambahkan string kosong ke dalam set
-            return output_files.union({f"Error While Embedding Watermark: file tidak ditemukan"}) 
-
-        # Cek apakah file yang diupload adalah PDF
-        if file_paths.lower().endswith('.pdf'):
-            # Konversi PDF ke gambar
-            images = convert_from_path(file_paths, dpi=300, poppler_path=r"C:\\Users\\user\\poppler\\poppler-24.07.0\\Library\\bin")
-            watermarked_images = []  # Menyimpan gambar dengan watermark untuk dikonversi kembali ke PDF
-            
-            for idx, image in enumerate(images):
-                open_cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-                open_cv_image = remove_white_background(open_cv_image, margin=0)
-                
-                if enchance_quality:
-                    print('Dilakukan Preprocessing')
-                    open_cv_image = preprocess_image(open_cv_image)
-                else:
-                    print('Tidak dilakukan preprocessing')
-
-                image_with_watermark = open_cv_image  # Inisialisasi dengan gambar asli
-
-                if watermark_type == 'text':
-                    font_color = get_color_from_string(font_color)
-                    if text is None:
-                        raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-                    
-                    if position_str == 'luar gambar':
-                        image_with_watermark = add_watermark_below_image(
-                            open_cv_image,
-                            text=text,
-                            bar_height=bar_height,  # Tinggi bar bisa disesuaikan
-                            opacity=opacity,
-                            font_color=font_color,
-                            font_type=font_type,
-                            scale_factor=scale_factor,
-                            font_scale=1,
-                            thickness=thickness
-                        )
-                    elif position_str == 'auto':
-                        image_with_watermark = add_watermark_with_auto_position(
-                            open_cv_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-                        )
-                    else:
-                        image_with_watermark = add_text_watermark(
-                            open_cv_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-                        )
-
-                elif watermark_type == 'logo':
-                    if logo_path is None:
-                        raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-                    logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=open_cv_image.shape[:2], scale_factor=scale_factor)
-                    
-                    if position_str == 'auto':
-                        image_with_watermark = add_watermark_with_auto_position(
-                            open_cv_image, logo, watermark_type='logo', opacity=opacity
-                        )                    
-                    else:
-                        image_with_watermark = add_logo_watermark(
-                            open_cv_image, logo, position_str, opacity=opacity
-                        )
-
-                watermarked_images.append(Image.fromarray(cv2.cvtColor(image_with_watermark, cv2.COLOR_BGR2RGB)))
-
-                base_name = os.path.basename(file_paths)
-                name, ext = os.path.splitext(base_name)
-                output_filename = os.path.join(f'Watermarked{idx + 1}_{name}.{output_format}')
-                output_files.add(output_filename)
-
-                if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-                    cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-                elif output_format.lower() == 'png':
-                    cv2.imwrite(output_filename, image_with_watermark)
-                else:
-                    raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-            if output_format.lower() == 'pdf':
-                pdf_output_filename = os.path.join(f'Watermarked{os.path.basename(file_paths)}')
-                watermarked_images[0].save(pdf_output_filename, save_all=True, append_images=watermarked_images[1:], resolution=300)
-                output_files.add("")  # Menambahkan string kosong
-                return {pdf_output_filename}  # Kembalikan nama file PDF hasil watermarking dalam set
-
-            output_files.add("")  # Menambahkan string kosong ke set
-            return output_files  # Kembalikan daftar file hasil watermarking dalam format gambar (set)
-
-        else:
-            # Jika file yang diupload bukan PDF, proses seperti biasa
-            image = cv2.imread(file_paths)
-            if image is None:
-                raise ValueError(f"Gambar tidak ditemukan di path: {file_paths}")
-
-            if enchance_quality:
-                print('Dilakukan Preprocessing')
-                preprocessed_image = preprocess_image(image)
-            else:
-                preprocessed_image = image  # Tidak dilakukan preprocessing jika enhance_quality = False
-                print('Tidak Dilakukan Preprocessing')
-            
-            image_with_watermark = preprocessed_image  # Inisialisasi dengan gambar asli
-
-            if watermark_type == 'text':
-                font_color = get_color_from_string(font_color)
-                if text is None:
-                    raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-              
-                if position_str == 'luar gambar':
-                    image_with_watermark = add_watermark_below_image(
-                        preprocessed_image,
-                        text=text,
-                        bar_height=bar_height,
-                        opacity=opacity,
-                        font_color=font_color,
-                        font_type=font_type,
-                        scale_factor=scale_factor,
-                        font_scale=1,
-                        thickness=thickness
-                    )
-                elif position_str == 'auto':
-                    image_with_watermark = add_watermark_with_auto_position(
-                        preprocessed_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-                    )
-                else:
-                    image_with_watermark = add_text_watermark(
-                        preprocessed_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-                    )
-        
-            elif watermark_type == 'logo':
-                if logo_path is None:
-                    raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-                logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
-                
-                if position_str == 'auto':
-                    image_with_watermark = add_watermark_with_auto_position(
-                        preprocessed_image, logo, watermark_type='logo', opacity=opacity
-                    )                    
-                else:
-                    image_with_watermark = add_logo_watermark(
-                        preprocessed_image, logo, position_str, opacity=opacity
-                    )
-
-            base_name = os.path.basename(file_paths)
-            name, ext = os.path.splitext(base_name)
-            output_filename = os.path.join(f'Watermarked{name}.{output_format}')
-            output_files.add(output_filename)
-
-            if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-                cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-            elif output_format.lower() == 'png':
-                cv2.imwrite(output_filename, image_with_watermark)
-            else:
-                raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-            output_files.add("")  # Menambahkan string kosong ke set
-            return output_files  # Kembalikan daftar file dalam set (meskipun hanya satu file)
-
-    except Exception as e:
-        output_files.add("")  # Menambahkan string kosong ke set saat ada error
-        return output_files.union({f"Error While Embedding Watermark: {str(e)}"})  # Mengembalikan output_files ditambah pesan kesalahan dalam set
-"""
-
-#Tuple
-"""
-def process_multiple_files(file_paths, watermark_type=None, enchance_quality=None, font_type=None, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
-    output_files = ()  # Inisialisasi tuple untuk menyimpan hasil output
-    
-    try:
-        # Cek apakah file path ada
-        if not os.path.exists(file_paths):
-            output_files = (file_paths,)  # Membuat tuple berisi file_paths
-            output_files = output_files + ("",)  # Menyisipkan elemen "" ke dalam tuple
-            return output_files + (f"Error While Embedding Watermark: file tidak ditemukan",)
-
-        # Cek apakah file yang diupload adalah PDF
-        if file_paths.lower().endswith('.pdf'):
-            # Konversi PDF ke gambar
-            images = convert_from_path(file_paths, dpi=300, poppler_path=r"C:\\Users\\user\\poppler\\poppler-24.07.0\\Library\\bin")
-            watermarked_images = []  # Menyimpan gambar dengan watermark untuk dikonversi kembali ke PDF
-            
-            for idx, image in enumerate(images):
-                open_cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-                open_cv_image = remove_white_background(open_cv_image, margin=0)
-                
-                if enchance_quality:
-                    print('Dilakukan Preprocessing')
-                    open_cv_image = preprocess_image(open_cv_image)
-                else:
-                    print('Tidak dilakukan preprocessing')
-
-                image_with_watermark = open_cv_image  # Inisialisasi dengan gambar asli
-
-                if watermark_type == 'text':
-                    font_color = get_color_from_string(font_color)
-                    if text is None:
-                        raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-                    
-                    if position_str == 'luar gambar':
-                        image_with_watermark = add_watermark_below_image(
-                            open_cv_image,
-                            text=text,
-                            bar_height=bar_height,  # Tinggi bar bisa disesuaikan
-                            opacity=opacity,
-                            font_color=font_color,
-                            font_type=font_type,
-                            scale_factor=scale_factor,
-                            font_scale=1,
-                            thickness=thickness
-                        )
-                    elif position_str == 'auto':
-                        image_with_watermark = add_watermark_with_auto_position(
-                            open_cv_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-                        )
-                    else:
-                        image_with_watermark = add_text_watermark(
-                            open_cv_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-                        )
-
-                elif watermark_type == 'logo':
-                    if logo_path is None:
-                        raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-                    logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=open_cv_image.shape[:2], scale_factor=scale_factor)
-                    
-                    if position_str == 'auto':
-                        image_with_watermark = add_watermark_with_auto_position(
-                            open_cv_image, logo, watermark_type='logo', opacity=opacity
-                        )                    
-                    else:
-                        image_with_watermark = add_logo_watermark(
-                            open_cv_image, logo, position_str, opacity=opacity
-                        )
-
-                watermarked_images.append(Image.fromarray(cv2.cvtColor(image_with_watermark, cv2.COLOR_BGR2RGB)))
-
-                base_name = os.path.basename(file_paths)
-                name, ext = os.path.splitext(base_name)
-                output_filename = os.path.join(f'Watermarked{idx + 1}_{name}.{output_format}')
-                output_files = output_files + (output_filename,)  # Menambah output filename ke tuple
-
-                if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-                    cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-                elif output_format.lower() == 'png':
-                    cv2.imwrite(output_filename, image_with_watermark)
-                else:
-                    raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-            if output_format.lower() == 'pdf':
-                pdf_output_filename = os.path.join(f'Watermarked{os.path.basename(file_paths)}')
-                watermarked_images[0].save(pdf_output_filename, save_all=True, append_images=watermarked_images[1:], resolution=300)
-                return (pdf_output_filename,)  # Kembalikan nama file PDF hasil watermarking sebagai tuple
-            
-            output_files = output_files + ("",)  # Menambahkan string kosong ke tuple
-            return output_files  # Kembalikan daftar file hasil watermarking dalam format gambar (tuple)
-
-        else:
-            # Jika file yang diupload bukan PDF, proses seperti biasa
-            image = cv2.imread(file_paths)
-            if image is None:
-                raise ValueError(f"Gambar tidak ditemukan di path: {file_paths}")
-
-            if enchance_quality:
-                print('Dilakukan Preprocessing')
-                preprocessed_image = preprocess_image(image)
-            else:
-                preprocessed_image = image  # Tidak dilakukan preprocessing jika enhance_quality = False
-                print('Tidak Dilakukan Preprocessing')
-            
-            image_with_watermark = preprocessed_image  # Inisialisasi dengan gambar asli
-
-            if watermark_type == 'text':
-                font_color = get_color_from_string(font_color)
-                if text is None:
-                    raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-              
-                if position_str == 'luar gambar':
-                    image_with_watermark = add_watermark_below_image(
-                        preprocessed_image,
-                        text=text,
-                        bar_height=bar_height,
-                        opacity=opacity,
-                        font_color=font_color,
-                        font_type=font_type,
-                        scale_factor=scale_factor,
-                        font_scale=1,
-                        thickness=thickness
-                    )
-                elif position_str == 'auto':
-                    image_with_watermark = add_watermark_with_auto_position(
-                        preprocessed_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-                    )
-                else:
-                    image_with_watermark = add_text_watermark(
-                        preprocessed_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-                    )
-        
-            elif watermark_type == 'logo':
-                if logo_path is None:
-                    raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-                logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
-                
-                if position_str == 'auto':
-                    image_with_watermark = add_watermark_with_auto_position(
-                        preprocessed_image, logo, watermark_type='logo', opacity=opacity
-                    )                    
-                else:
-                    image_with_watermark = add_logo_watermark(
-                        preprocessed_image, logo, position_str, opacity=opacity
-                    )
-
-            base_name = os.path.basename(file_paths)
-            name, ext = os.path.splitext(base_name)
-            output_filename = os.path.join(f'Watermarked{name}.{output_format}')
-            output_files = output_files + (output_filename,)  # Menambahkan output filename ke tuple
-
-            if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-                cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-            elif output_format.lower() == 'png':
-                cv2.imwrite(output_filename, image_with_watermark)
-            else:
-                raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-            
-            output_files = output_files + ("",)  # Menambahkan string kosong ke tuple
-            return output_files  # Kembalikan daftar file dalam tuple (meskipun hanya satu file)
-
-    except Exception as e:
-        return output_files + (f"Error While Embedding Watermark: {str(e)}",)  # Mengembalikan output_files ditambah pesan kesalahan dalam tuple
-"""
-
-#LIST
-"""def process_multiple_files(file_paths, watermark_type=None, enchance_quality=None, font_type=None, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
-    output_files = []  # Inisialisasi list untuk menyimpan hasil output
-    
-    try:
-        # Cek apakah file path ada
-        if not os.path.exists(file_paths):
-            output_files.append(file_paths)
-            return output_files + [f"Error While Embedding Watermark: file tidak ditemukan"] 
-            #return [f"Error: File tidak ditemukan di path: {file_paths}"]  # Jika file path tidak ditemukan
-
-        # Cek apakah file yang diupload adalah PDF
-        if file_paths.lower().endswith('.pdf'):
-            # Konversi PDF ke gambar
-            images = convert_from_path(file_paths, dpi=300, poppler_path=r"C:\\Users\\user\\poppler\\poppler-24.07.0\\Library\\bin")
-            watermarked_images = []  # Menyimpan gambar dengan watermark untuk dikonversi kembali ke PDF
-            
-            for idx, image in enumerate(images):
-                open_cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-                open_cv_image = remove_white_background(open_cv_image, margin=0)
-                
-                if enchance_quality:
-                    print('Dilakukan Preprocessing')
-                    open_cv_image = preprocess_image(open_cv_image)
-                else:
-                    print('Tidak dilakukan preprocessing')
-
-                image_with_watermark = open_cv_image  # Inisialisasi dengan gambar asli
-
-                if watermark_type == 'text':
-                    font_color = get_color_from_string(font_color)
-                    if text is None:
-                        raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-                    
-                    if position_str == 'luar gambar':
-                        image_with_watermark = add_watermark_below_image(
-                            open_cv_image,
-                            text=text,
-                            bar_height=bar_height,  # Tinggi bar bisa disesuaikan
-                            opacity=opacity,
-                            font_color=font_color,
-                            font_type=font_type,
-                            scale_factor=scale_factor,
-                            font_scale=1,
-                            thickness=thickness
-                        )
-                    elif position_str == 'auto':
-                        image_with_watermark = add_watermark_with_auto_position(
-                            open_cv_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-                        )
-                    else:
-                        image_with_watermark = add_text_watermark(
-                            open_cv_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-                        )
-
-                elif watermark_type == 'logo':
-                    if logo_path is None:
-                        raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-                    logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=open_cv_image.shape[:2], scale_factor=scale_factor)
-                    
-                    if position_str == 'auto':
-                        image_with_watermark = add_watermark_with_auto_position(
-                            open_cv_image, logo, watermark_type='logo', opacity=opacity
-                        )                    
-                    else:
-                        image_with_watermark = add_logo_watermark(
-                            open_cv_image, logo, position_str, opacity=opacity
-                        )
-
-                watermarked_images.append(Image.fromarray(cv2.cvtColor(image_with_watermark, cv2.COLOR_BGR2RGB)))
-
-                base_name = os.path.basename(file_paths)
-                name, ext = os.path.splitext(base_name)
-                output_filename = os.path.join(f'Watermarked{idx + 1}_{name}.{output_format}')
-                output_files.append(output_filename)
-
-                if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-                    cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-                elif output_format.lower() == 'png':
-                    cv2.imwrite(output_filename, image_with_watermark)
-                else:
-                    raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-            if output_format.lower() == 'pdf':
-                pdf_output_filename = os.path.join(f'Watermarked{os.path.basename(file_paths)}')
-                watermarked_images[0].save(pdf_output_filename, save_all=True, append_images=watermarked_images[1:], resolution=300)
-                return [pdf_output_filename]  # Kembalikan nama file PDF hasil watermarking dalam list
-
-            return output_files + ['']  # Kembalikan daftar file hasil watermarking dalam format gambar (list)
-
-        else:
-            # Jika file yang diupload bukan PDF, proses seperti biasa
-            image = cv2.imread(file_paths)
-            if image is None:
-                raise ValueError(f"Gambar tidak ditemukan di path: {file_paths}")
-
-            if enchance_quality:
-                print('Dilakukan Preprocessing')
-                preprocessed_image = preprocess_image(image)
-            else:
-                preprocessed_image = image  # Tidak dilakukan preprocessing jika enhance_quality = False
-                print('Tidak Dilakukan Preprocessing')
-            
-            image_with_watermark = preprocessed_image  # Inisialisasi dengan gambar asli
-
-            if watermark_type == 'text':
-                font_color = get_color_from_string(font_color)
-                if text is None:
-                    raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-              
-                if position_str == 'luar gambar':
-                    image_with_watermark = add_watermark_below_image(
-                        preprocessed_image,
-                        text=text,
-                        bar_height=bar_height,
-                        opacity=opacity,
-                        font_color=font_color,
-                        font_type=font_type,
-                        scale_factor=scale_factor,
-                        font_scale=1,
-                        thickness=thickness
-                    )
-                elif position_str == 'auto':
-                    image_with_watermark = add_watermark_with_auto_position(
-                        preprocessed_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-                    )
-                else:
-                    image_with_watermark = add_text_watermark(
-                        preprocessed_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-                    )
-        
-            elif watermark_type == 'logo':
-                if logo_path is None:
-                    raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-                logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
-                
-                if position_str == 'auto':
-                    image_with_watermark = add_watermark_with_auto_position(
-                        preprocessed_image, logo, watermark_type='logo', opacity=opacity
-                    )                    
-                else:
-                    image_with_watermark = add_logo_watermark(
-                        preprocessed_image, logo, position_str, opacity=opacity
-                    )
-
-            base_name = os.path.basename(file_paths)
-            name, ext = os.path.splitext(base_name)
-            output_filename = os.path.join(f'Watermarked{name}.{output_format}')
-            output_files.append(output_filename)
-
-            if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-                cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-            elif output_format.lower() == 'png':
-                cv2.imwrite(output_filename, image_with_watermark)
-            else:
-                raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-            return output_files + ['']  # Kembalikan daftar file dalam list (meskipun hanya satu file)
-
-    except Exception as e:
-        #return f"Error While Embedding Watermark: {str(e)}", output_files  # Kembalikan pesan error dan daftar file output jika ada
-        return output_files + [f"Error While Embedding Watermark: {str(e)}"]  # Mengembalikan output_files ditambah pesan kesalahan
-        #return output_files + ['Error While Embedding Watermark'] # Kembalikan pesan error dan daftar file output jika ada
-"""
-
-# file_paths = 'Gambar\komputer mainframe1.jpg'
-
-# results = process_multiple_files(file_paths,watermark_type='logo',
-#                     text='Sample Watermark',font_type='hershey script simplex',
-#                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='png',
-#                     enchance_quality=True,
-#                     #logo_path=None)
-#                     logo_path='Gambar\watermark logo.png')
-
-# print(results)
-
-#def main(file_paths, watermark_type, output_path, enchance_quality=None,font_type=None, text=None, logo_path=None, position_str=None, opacity=None, bar_height=50, font_color=(255, 255, 255), scale_factor=0.3, thickness=2, output_format='png'):
-    # output_files = []  # Inisialisasi list untuk menyimpan hasil output
-    
-    # try:
-    #     # Cek apakah file yang diupload adalah PDF
-    #     if image_path.lower().endswith('.pdf'):
-    #         # Konversi PDF ke gambar
-    #         images = convert_from_path(image_path, dpi=300, poppler_path=r"C:\\Users\\user\\poppler\\poppler-24.07.0\\Library\\bin")
-    #         watermarked_images = []  # Menyimpan gambar dengan watermark untuk dikonversi kembali ke PDF
-            
-    #         for idx, image in enumerate(images):
-    #             open_cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-    #             open_cv_image = remove_white_background(open_cv_image, margin=0)
-                
-    #             if enchance_quality:
-    #                 print('Dilakukan Preprocessing')
-    #                 open_cv_image = preprocess_image(open_cv_image)
-    #             else:
-    #                 print('Tidak dilakukan preprocessing')
-
-    #             if watermark_type == 'text':
-    #                 font_color = get_color_from_string(font_color)
-    #                 if text is None:
-    #                     raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-                    
-    #                 if position_str == 'luar gambar':
-    #                     image_with_watermark = add_watermark_below_image(
-    #                         open_cv_image,
-    #                         text=text,
-    #                         bar_height=bar_height,  # Tinggi bar bisa disesuaikan
-    #                         opacity=opacity,
-    #                         font_color=font_color,
-    #                         font_type=font_type,
-    #                         scale_factor=scale_factor,
-    #                         font_scale=1,
-    #                         thickness=thickness
-    #                     )
-    #                 elif position_str == 'auto':
-    #                     image_with_watermark = add_watermark_with_auto_position(
-    #                         open_cv_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-    #                     )
-    #                 else:
-    #                     image_with_watermark = add_text_watermark(
-    #                         open_cv_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-    #                     )
-
-    #             elif watermark_type == 'logo':
-    #                 if logo_path is None:
-    #                     raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-    #                 logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=open_cv_image.shape[:2], scale_factor=scale_factor)
-                    
-    #                 if position_str == 'auto':
-    #                     image_with_watermark = add_watermark_with_auto_position(
-    #                         open_cv_image, logo, watermark_type='logo', opacity=opacity
-    #                     )                    
-    #                 else:
-    #                     image_with_watermark = add_logo_watermark(
-    #                         open_cv_image, logo, position_str, opacity=opacity
-    #                     )
-
-    #             watermarked_images.append(Image.fromarray(cv2.cvtColor(image_with_watermark, cv2.COLOR_BGR2RGB)))
-
-    #             if not os.path.exists(output_path):
-    #                 os.makedirs(output_path)
-
-    #             base_name = os.path.basename(image_path)
-    #             name, ext = os.path.splitext(base_name)
-    #             output_filename = os.path.join(output_path, f'Watermarked_Page_{idx + 1}_{name}.{output_format}')
-    #             output_files.append(output_filename)
-
-    #             if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-    #                 cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-    #             elif output_format.lower() == 'png':
-    #                 cv2.imwrite(output_filename, image_with_watermark)
-    #             else:
-    #                 raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-    #         if output_format.lower() == 'pdf':
-    #             pdf_output_filename = os.path.join(output_path, f'Watermarked_{os.path.basename(image_path)}')
-    #             watermarked_images[0].save(pdf_output_filename, save_all=True, append_images=watermarked_images[1:], resolution=300)
-    #             return [pdf_output_filename]  # Kembalikan nama file PDF hasil watermarking dalam list
-
-    #         return output_files  # Kembalikan daftar file hasil watermarking dalam format gambar (list)
-
-    #     else:
-    #         # Jika file yang diupload bukan PDF, proses seperti biasa
-    #         image = cv2.imread(image_path)
-    #         if image is None:
-    #             raise ValueError(f"Gambar tidak ditemukan di path: {image_path}")
-
-    #         if enchance_quality:
-    #                 print('Dilakukan Preprocessing')
-    #                 preprocessed_image = preprocess_image(open_cv_image)
-    #         else:
-    #             print('Tidak dilakukan preprocessing')
-            
-    #         if watermark_type == 'text':
-    #             font_color = get_color_from_string(font_color)
-    #             if text is None:
-    #                 raise ValueError("Text harus disediakan untuk watermark jenis teks.")
-              
-    #             if position_str == 'luar gambar':
-    #                 image_with_watermark = add_watermark_below_image(
-    #                     preprocessed_image,
-    #                     text=text,
-    #                     bar_height=bar_height,
-    #                     opacity=opacity,
-    #                     font_color=font_color,
-    #                     font_type=font_type,
-    #                     scale_factor=scale_factor,
-    #                     font_scale=1,
-    #                     thickness=thickness
-    #                 )
-    #             elif position_str == 'auto':
-    #                 image_with_watermark = add_watermark_with_auto_position(
-    #                     preprocessed_image, text, watermark_type='text', font_color=font_color, font_type=font_type, thickness=thickness, opacity=opacity
-    #                 )
-    #             else:
-    #                 image_with_watermark = add_text_watermark(
-    #                     preprocessed_image, text, position_str, font_color=font_color, font_type=font_type, opacity=opacity, thickness=thickness
-    #                 )
-        
-    #         elif watermark_type == 'logo':
-    #             if logo_path is None:
-    #                 raise ValueError("Path logo harus disediakan untuk watermark jenis logo.")
-    #             logo = preprocess_logo(cv2.imread(logo_path, cv2.IMREAD_UNCHANGED), image_size=preprocessed_image.shape[:2], scale_factor=scale_factor)
-                
-    #             if position_str == 'auto':
-    #                 image_with_watermark = add_watermark_with_auto_position(
-    #                     preprocessed_image, logo, watermark_type='logo', opacity=opacity
-    #                 )                    
-    #             else:
-    #                 image_with_watermark = add_logo_watermark(
-    #                     preprocessed_image, logo, position_str, opacity=opacity
-    #                 )
-
-    #         if not os.path.exists(output_path):
-    #             os.makedirs(output_path)
-
-    #         base_name = os.path.basename(image_path)
-    #         name, ext = os.path.splitext(base_name)
-    #         output_filename = os.path.join(output_path, f'Watermark_{name}.{output_format}')
-    #         output_files.append(output_filename)
-
-    #         if output_format.lower() == 'jpg' or output_format.lower() == 'jpeg':
-    #             cv2.imwrite(output_filename, image_with_watermark, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-    #         elif output_format.lower() == 'png':
-    #             cv2.imwrite(output_filename, image_with_watermark)
-    #         else:
-    #             raise ValueError("Format output tidak didukung. Silakan pilih 'jpg', 'jpeg', atau 'png'.")
-
-    #         return output_files  # Kembalikan daftar file dalam list (meskipun hanya satu file)
-
-    # except Exception as e:
-    #     return f"Error: {str(e)}", output_files
-
-
-# def process_multiple_files(file_paths, watermark_type, enchance_quality,font_type=None, text=None, thickness=None, logo_path=None, scale_factor=0.3, position_str=None, opacity=None, font_color="putih", output_format='png'):
-    # Inisialisasi list untuk menyimpan output dari setiap file yang diproses
-    # all_output_files = []
-    # all_output_files
-    # error_messages = []
-
-    # for file_paths in file_paths:
-    #     if os.path.isfile(file_path):
-    #         try:
-    #             print(f"Memproses {file_path}...")
-    #             # Memanggil fungsi main untuk setiap file
-    #             output_files = main(
-    #                 image_path=file_path,
-    #                 watermark_type=watermark_type,
-    #                 text=text,
-    #                 enchance_quality=enchance_quality,
-    #                 font_type=font_type,
-    #                 scale_factor=scale_factor,
-    #                 logo_path=logo_path,
-    #                 thickness=thickness,
-    #                 position_str=position_str,
-    #                 opacity=opacity,
-    #                 font_color=font_color,
-    #                 output_format=output_format
-    #             )
-    #             # Menambahkan hasil output ke dalam list
-    #             if isinstance(output_files, list):
-    #                 all_output_files.extend(output_files)  # Jika `output_files` adalah list, tambahkan semuanya
-    #             else:
-    #                 all_output_files.append(output_files)  # Jika hanya satu file, tambahkan langsung
-    #         except Exception as e:
-    #             #error_messages.append(f"Error processing {file_path}: {str(e)}")
-    #             error_messages.append(f"Error while embedding watermark")
-    #             error_messages.append(file_path)
-                
-
-    # # Return daftar file output yang berhasil diproses, atau error jika ada
-    # if error_messages:
-    #     combined_list = all_output_files + error_messages  # Gabungkan output file dengan pesan error
-    #     return combined_list
-    # else:
-    #     return all_output_files + ['']  # Return "Watermarked" sebagai penanda sukses dan output file paths
-
-
-# Fungsi untuk memilih file menggunakan dialog file picker dari tkinter
-# def select_files():
-#     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
-#     file_paths = askopenfilenames(title="Pilih Gambar", filetypes=[("Image files", "*.jpg *.jpeg *.png *.pdf")])
-#     return file_paths
-
-# # Memilih file secara langsung dengan tkinter
-# file_paths = select_files()
-
-# # # #Jika ada file yang dipilih
-# if file_paths:
-#     # Proses setiap file yang dipilih
-#     process_multiple_files(
-#         file_paths=file_paths,
-#         watermark_type='text',
-#         output_path="Watermarked Content",
-#         text='Contoh',  # Contoh teks watermark
-#         position_str=2,#"kanan bawah",
-#         opacity=0.3,
-#         #font_scale=0.5,
-#         scale_factor=0.5,
-#         thickness=2,
-#         font_color='#49FFCE',  # Input warna sebagai string
-#         output_format='png'  # Format output (bisa 'png' atau 'jpg')
-#     )
-# else:
-#     print("Tidak ada file yang dipilih.")
-
-# Path Directory
-# C:\D\Bootcamp\ICStar Hackathon 2024\Project Watermark\BackEnd Watermark\Gambar\ 
-
-
-# print(f"Watermark telah ditambahkan: {output_image}")
