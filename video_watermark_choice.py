@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 import os
-from tkinter import Tk
-from tkinter.filedialog import askopenfilenames
 from PIL import Image, ImageDraw, ImageFont
 
 def get_color_from_string(color_str):
@@ -65,11 +63,11 @@ def get_cv2_font(font_name):
 
 def denoise_frame(frame):
     """Mengurangi noise pada frame menggunakan Gaussian Blur."""
-    return cv2.GaussianBlur(frame, (5, 5), 0)
+    return cv2.GaussianBlur(frame, (5, 5), 0) # ukuran kernel yang digunakan untuk blurring (semakin besar kernel, semakin kabur hasilnya). 0: nilai standar deviasi yang otomatis disesuaikan berdasarkan ukuran kernel.
 
 def sharpen_frame(frame):
     """Menajamkan frame dengan filter kernel."""
-    kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])
+    kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]]) #Kernel ini adalah matriks 3x3 yang dirancang untuk menekankan detail dalam gambar. Elemen pusatnya (5) mengindikasikan bahwa nilai piksel di pusat harus lebih tinggi dari nilai piksel sekitarnya, sedangkan elemen lainnya (-1) mengindikasikan bahwa nilai piksel di sekitar pusat harus dikurangi, yang menghasilkan efek penajaman.
     return cv2.filter2D(frame, -1, kernel)
 
 def preprocess_logo_video(logo, scale_factor):
@@ -111,33 +109,6 @@ def remove_background_video(logo):
 
     return logo_rgba
 
-# def remove_background_video(logo):
-#     """Menghilangkan latar belakang dari logo menggunakan thresholding."""
-#     gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
-    
-#     # Membuat mask berdasarkan thresholding
-#     _, mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY_INV)
-
-#     # Menggunakan mask untuk menghilangkan latar belakang
-#     logo_with_mask = cv2.bitwise_and(logo, logo, mask=mask)
-
-#     # Cek jumlah saluran logo
-#     if logo.shape[2] == 3:  # RGB
-#         # Jika logo adalah RGB, buat alpha channel dengan nilai penuh
-#         b, g, r = cv2.split(logo)
-#         alpha_channel = np.zeros(b.shape, dtype=b.dtype)  # Alpha channel kosong
-#         alpha_channel[mask > 0] = 255  # Set alpha channel menjadi 255 di area yang tidak putih
-#         logo_rgba = cv2.merge((b, g, r, alpha_channel))
-#     elif logo.shape[2] == 4:  # RGBA
-#         # Jika logo sudah memiliki alpha channel
-#         b, g, r, a = cv2.split(logo)
-#         # Buat mask baru yang berdasarkan warna putih
-#         new_mask = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)[1]  # Mask untuk area putih
-#         a[new_mask == 255] = 0  # Set alpha channel menjadi 0 di area putih
-#         logo_rgba = cv2.merge((b, g, r, a))
-
-#     return logo_rgba
-
 def add_logo_watermark_video(frame, logo, position, opacity=1.0):
     """Menambahkan watermark logo ke frame dengan transparansi di posisi yang ditentukan."""
     h, w, _ = logo.shape
@@ -147,46 +118,6 @@ def add_logo_watermark_video(frame, logo, position, opacity=1.0):
              frame[position[1]:position[1]+h, position[0]:position[0]+w, c] *
              (1.0 - logo[:, :, 3] / 255.0 * opacity))
     return frame
-
-# def add_text_watermark_video(frame, text, position, font_color,font_type, thickness=2, scale_factor=0.05, opacity=1.0):
-#     """Menambahkan watermark teks ke frame dengan transparansi di posisi yang ditentukan."""
-#     font = get_cv2_font(font_type)
-#     #font = cv2.FONT_HERSHEY_SIMPLEX
-#     scale = scale_factor * frame.shape[1] / 1000  # Menyesuaikan ukuran teks
-#     text_size = cv2.getTextSize(text, font, scale, thickness)[0]
-
-#     # Menentukan posisi teks
-#     if position == 'tengah tengah':#Tengah
-#         position = ((frame.shape[1] - text_size[0]) // 2, (frame.shape[0] + text_size[1]) // 2)
-#     elif position == 'atas kanan':#Kanan Atas
-#         position = (frame.shape[1] - text_size[0] - 10, text_size[1] + 10)
-#     elif position == 'bawah kanan':#Kanan Bawah
-#         position = (frame.shape[1] - text_size[0] - 10, frame.shape[0] - 10)
-#     elif position == 'atas kiri':#Kiri Atas
-#         position = (10, text_size[1] + 10)
-#     elif position == 'bawah kiri':#Kiri Bawah
-#         position = (10, frame.shape[0] - 10)
-#     elif position == 'atas tengah':#Tengah Atas
-#         position = ((frame.shape[1] - text_size[0]) // 2, text_size[1] + 10)
-#     elif position == 'bawah tengah':#Tengah Bawah
-#         position = ((frame.shape[1] - text_size[0]) // 2, frame.shape[0] - 10)
-#     elif position == 'tengah kiri':  # Kiri Tengah
-#         position = (10, (frame.shape[0] - text_size[1]) // 2)
-#     elif position == 'tengah kanan':  # Kanan Tengah
-#         position = (frame.shape[1] - text_size[0] - 10, (frame.shape[0] - text_size[1]) // 2)
-#     else:
-#         raise ValueError(f"Posisi '{position}' tidak dikenal.")
-
-#     overlay = frame.copy()
-#     # Memastikan position adalah tuple dengan dua nilai
-#     if isinstance(position, tuple) and len(position) == 2:
-#         cv2.putText(overlay, text, position, font, scale, font_color, thickness, cv2.LINE_AA)
-#     else:
-#         raise ValueError("Posisi harus berupa tuple yang berisi dua nilai (x, y).")
-
-#     # Menggabungkan teks dengan transparansi
-#     cv2.addWeighted(overlay, opacity, frame, 1 - opacity, 0, frame)
-#     return frame
 
 def add_text_watermark_video(frame, text, position, font_color, font_type, thickness=2, scale_factor=0.05, opacity=1.0):
     """Menambahkan watermark teks ke frame dengan transparansi di posisi yang ditentukan."""
@@ -266,15 +197,6 @@ def add_text_watermark_video(frame, text, position, font_color, font_type, thick
         if isinstance(position, tuple) and len(position) == 2:
             if use_opencv:
                 cv2.putText(overlay, text, position, font, scale, font_color, thickness, cv2.LINE_AA)
-            # else:
-            #     # Jika menggunakan TTF, konversi kembali ke PIL untuk menambahkan teks
-            #     draw = ImageDraw.Draw(Image.fromarray(cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB)))
-            #     font_color = font_color[::-1]# Konversi warna ke RGB untuk TTF
-            #     draw.text(position, text, font=font, fill=font_color)
-            #     overlay = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-
-            #     # Menggabungkan teks dengan transparansi
-            # cv2.addWeighted(overlay, opacity, frame, 1 - opacity, 0, frame)
             else:
                 # Jika menggunakan TTF, tambahkan teks menggunakan pil_image
                 draw = ImageDraw.Draw(pil_image)
@@ -424,266 +346,3 @@ def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='
     cv2.destroyAllWindows()
 
     return output_result  # Return output result yang berisi [Output Video Path, Error Message]
-
-
-# def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='mp4', **kwargs):
-#     """Menambahkan watermark ke beberapa video berdasarkan jenis watermark yang dipilih."""
-#     output_video_paths = []  # Menyimpan daftar video yang berhasil diproses
-#     error_messages = []  # Menyimpan pesan error jika ada
-
-#     # Dapatkan direktori di mana kode saat ini berada
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-
-#     # Tentukan codec video berdasarkan format output
-#     if output_format == 'mp4':
-#         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-#     elif output_format == 'avi':
-#         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-#     elif output_format == 'mov':
-#         fourcc = cv2.VideoWriter_fourcc(*'avc1')
-#     else:
-#         raise ValueError(f"Tipe format output '{output_format}' tidak didukung. Pilih antara 'mp4', 'avi', atau 'mov'.")
-
-#     # Inisialisasi hasil
-#     output_result = [None, '']  # Format [Output Video Path, Error Message]
-
-#     try:
-#         # Coba buka video input
-#         cap = cv2.VideoCapture(video_path)
-#         if not cap.isOpened():
-#             raise ValueError(f"Video tidak dapat dibuka: {video_path}")
-
-#         # Ambil informasi video (fps, ukuran frame, dll.)
-#         fps = cap.get(cv2.CAP_PROP_FPS)
-#         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-#         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-#         # Generate output filename di folder yang sama dengan file kode
-#         filename = os.path.basename(video_path)  # Ambil nama file dari path input
-#         output_video_path = f"Watermarked_{filename.split('.')[0]}.{output_format}"  # Hanya nama file, tanpa direktori
-#         output_video_paths.append(output_video_path)
-#         output_result[0] = output_video_path  # Set output path
-
-#         # Buat video writer
-#         out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
-
-#         enhance_quality = kwargs.get('enhance_quality', True)  # Ambil opsi enhance_quality
-
-#         while True:
-#             ret, frame = cap.read()
-#             if not ret:
-#                 break
-
-#             # Proses denoise dan sharpening frame jika diperlukan
-#             if enhance_quality:
-#                 frame = denoise_frame(frame)
-#                 frame = sharpen_frame(frame)
-
-#             # Tambahkan watermark berdasarkan jenis yang dipilih
-#             if watermark_type == 'logo':
-#                 logo_path = kwargs.get('logo_path')
-#                 position_str = kwargs.get('position_str', 'kanan bawah')
-#                 opacity = kwargs.get('opacity', 0.6)
-
-#                 # Load logo dan preprocess
-#                 logo = cv2.imread(logo_path, cv2.IMREAD_UNCHANGED)
-#                 if logo is None:
-#                     raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
-#                 logo = preprocess_logo_video(logo, kwargs.get('scale_factor', 0.3))
-
-#                 # Dapatkan posisi watermark
-#                 position = get_watermark_position_video(frame, logo, position_str)
-
-#                 # Tambahkan logo watermark
-#                 frame = add_logo_watermark_video(frame, logo, position, opacity)
-
-#             elif watermark_type == 'text':
-#                 text = kwargs.get('text', '')
-#                 position_str = kwargs.get('position_str', 'bawah kanan')
-
-#                 # Dapatkan warna font dari input user (gunakan putih sebagai default)
-#                 color_str = kwargs.get('font_color', '#FFFFFF')
-#                 font_color = get_color_from_string(color_str)  # Ambil warna dari hex atau nama warna
-
-#                 thickness = kwargs.get('thickness', 2)
-#                 scale_factor = kwargs.get('scale_factor', 0.5)
-#                 opacity = kwargs.get('opacity', 0.6)
-#                 font_type = kwargs.get('font_type', 'hershey simplex')
-
-#                 # Tambahkan teks watermark
-#                 frame = add_text_watermark_video(frame, text, position_str, font_color, font_type, thickness, scale_factor, opacity)
-
-#             # Tulis frame ke video output
-#             out.write(frame)
-
-#         # Bersihkan resources
-#         cap.release()
-#         out.release()
-
-#     except Exception as e:
-#         # Jika terjadi error, tambahkan pesan error
-#         output_result[1] = f"Error while embedding watermark: {str(e)}"
-#         output_result[0] = video_path  # Set path video input yang gagal sebagai output
-
-#     cv2.destroyAllWindows()
-
-#     return output_result  # Return output result yang berisi [Output Video Path, Error Message]
-
-
-#video_path = 'Gambar\SampleVideo_1280x720_1mb.mp4'  # Ganti dengan path video yang sesuai
-#video_path = 'Gambar\file_example_MP4_1920_18MG.mp4'
-
-# results = add_watermark_to_multiple_videos(video_path,
-#                                             watermark_type='logo',
-#                                             logo_path='Gambar\watermark logo.png',
-#                                             text='Sample Watermark',
-#                                             position_str='bawah kanan',
-#                                             opacity=0.6,
-#                                             output_format='mp4',
-#                                             enhance_quality=True)
-
-# print(results)
-
-
-#def add_watermark_to_multiple_videos(video_path, watermark_type, output_format='mp4', **kwargs):
-    #"""Menambahkan watermark ke beberapa video berdasarkan jenis watermark yang dipilih."""
-    # output_video_paths = []  # Menyimpan daftar video yang berhasil diproses
-    # error_messages = []  # Menyimpan pesan error jika ada
-
-    # # Dapatkan direktori di mana kode saat ini berada
-    # current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # # Tentukan codec video berdasarkan format output
-    # if output_format == 'mp4':
-    #     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    # elif output_format == 'avi':
-    #     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # elif output_format == 'mov':
-    #     fourcc = cv2.VideoWriter_fourcc(*'avc1')
-    # else:
-    #     raise ValueError(f"Tipe format output '{output_format}' tidak didukung. Pilih antara 'mp4', 'avi', atau 'mov'.")
-
-    # # Loop melalui semua video yang akan diberi watermark
-    # for input_video_path in video_paths:
-    #     try:
-    #         # Coba buka video input
-    #         cap = cv2.VideoCapture(input_video_path)
-    #         if not cap.isOpened():
-    #             raise ValueError(f"Video tidak dapat dibuka: {input_video_path}")
-
-    #         # Ambil informasi video (fps, ukuran frame, dll.)
-    #         fps = cap.get(cv2.CAP_PROP_FPS)
-    #         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    #         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    #         # Generate output filename di folder yang sama dengan file kode
-    #         filename = os.path.basename(input_video_path)  # Ambil nama file dari path input
-    #         output_video_path = f"Watermarked{filename.split('.')[0]}.{output_format}"  # Hanya nama file, tanpa direktori
-    #         #output_video_path = os.path.join(current_dir, output_video_name)  # Gabungkan nama file dengan direktori saat ini
-    #         output_video_paths.append(output_video_path)
-
-    #         # Buat video writer
-    #         out = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
-
-    #         enhance_quality = kwargs.get('enhance_quality', True)  # Ambil opsi enhance_quality
-
-    #         while True:
-    #             ret, frame = cap.read()
-    #             if not ret:
-    #                 break
-
-    #             # Proses denoise dan sharpening frame jika diperlukan
-    #             if enhance_quality:
-    #                 frame = denoise_frame(frame)
-    #                 frame = sharpen_frame(frame)
-
-    #             # Tambahkan watermark berdasarkan jenis yang dipilih
-    #             if watermark_type == 'logo':
-    #                 logo_path = kwargs.get('logo_path')
-    #                 position_str = kwargs.get('position_str', 'kanan bawah')
-    #                 opacity = kwargs.get('opacity', 0.6)
-
-    #                 # Load logo dan preprocess
-    #                 logo = cv2.imread(logo_path, cv2.IMREAD_UNCHANGED)
-    #                 if logo is None:
-    #                     raise ValueError(f"Logo tidak dapat dibuka: {logo_path}")
-    #                 logo = preprocess_logo_video(logo, kwargs.get('scale_factor', 0.3))
-
-    #                 # Dapatkan posisi watermark
-    #                 position = get_watermark_position_video(frame, logo, position_str)
-
-    #                 # Tambahkan logo watermark
-    #                 frame = add_logo_watermark_video(frame, logo, position, opacity)
-
-    #             elif watermark_type == 'text':
-    #                 text = kwargs.get('text', '')
-    #                 position_str = kwargs.get('position_str', 'bawah kanan')
-
-    #                 # Dapatkan warna font dari input user (gunakan putih sebagai default)
-    #                 color_str = kwargs.get('font_color', '#FFFFFF')
-    #                 font_color = get_color_from_string(color_str)  # Ambil warna dari hex atau nama warna
-                    
-    #                 thickness = kwargs.get('thickness', 2)
-    #                 scale_factor = kwargs.get('scale_factor', 0.5)
-    #                 opacity = kwargs.get('opacity', 0.6)
-    #                 font_type = kwargs.get('font_type', 'hershey simplex')
-
-    #                 # Tambahkan teks watermark
-    #                 frame = add_text_watermark_video(frame, text, position_str, font_color, font_type, thickness, scale_factor, opacity)
-
-    #             # Tulis frame ke video output
-    #             out.write(frame)
-
-    #         # Bersihkan resources
-    #         cap.release()
-    #         out.release()
-
-    #     except Exception as e:
-    #         # Jika terjadi error, tambahkan pesan error dan lanjutkan ke video berikutnya
-    #         #error_messages.append(f"Error while embedding watermark {input_video_path}: {str(e)}")
-    #         error_messages.append(input_video_path)
-    #         error_messages.append(f"Error while embedding watermark")
-    
-    # cv2.destroyAllWindows()
-
-    # # Return daftar video output yang berhasil dihasilkan, atau error jika ada
-    # if error_messages:
-    #     combined_list = output_video_paths + error_messages # Gabungkan output video dengan pesan error
-    #     return combined_list
-    # else:
-    #     return output_video_paths + ['']# Return output video paths yang berhasil dihasilkan
-
-# Contoh penggunaan untuk beberapa video
-# Contoh penggunaan untuk multiple file upload
-# Fungsi untuk memilih file menggunakan dialog file picker dari tkinter
-# def select_files():
-#     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
-#     file_paths = askopenfilenames(title="Pilih Video", filetypes=[("Video files", "*.mp4 *.avi *.mov")])
-#     return file_paths
-
-# # Memilih file secara langsung dengan tkinter
-# file_paths = select_files()
-
-# output_videos = add_watermark_to_multiple_videos(
-#     video_paths=file_paths,
-#     watermark_type='logo',
-#     output_path="Watermarked Content",
-#     logo_path='Gambar\\watermark logo.png',
-#     position_str=8,
-#     opacity=0.5
-# )
-
-# print(f"Video dengan watermark disimpan sebagai: {output_videos}")
-
-# output_videos = add_watermark_to_multiple_videos(
-#     video_paths=file_paths,
-#     watermark_type='text',
-#     output_path='Watermarked Content',
-#     text='Hak Cipta 2024',
-#     position_str=8,#'kanan bawah',
-#     font_color="#49FFCE",  # Nama warna
-#     opacity=0.3,
-#     #thickness=2
-# )
-
-# print(f"Video dengan watermark disimpan sebagai: {output_videos}")

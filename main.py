@@ -1,12 +1,4 @@
 from watermark_handler import run_watermark_handler
-from tkinter import Tk
-from tkinter.filedialog import askopenfilenames
-
-# Fungsi untuk memilih file menggunakan tkinter
-# def select_files():
-#     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
-#     file_paths = askopenfilenames(title="Pilih File", filetypes=[("Image files", "*.jpg *.jpeg *.png"), ("Video files", "*.mp4 *.avi *.mov"), ("PDF files", "*.pdf")])
-#     return file_paths
 
 def watermark_image(file_path,          # Content File Path (String)
                     logo_path=None,     # Watermark File Path (String)
@@ -191,38 +183,3 @@ def watermark_video(file_path,              # Content File Path (String)
 
 # print(results)
 
-# def select_files():
-#     Tk().withdraw()  # Untuk menyembunyikan jendela Tkinter yang kosong
-#     file_paths = askopenfilenames(title="Pilih File", filetypes=[("Image files", "*.jpg *.jpeg *.png *.mp4 *.avi *.mov *.pdf")])
-#     return file_paths
-
-# Memilih file secara langsung dengan tkinter
-# file_paths = select_files()
-
-# # Pastikan ada file yang dipilih
-# if not file_paths:
-#     print("Tidak ada file yang dipilih.")
-# else:
-#     # Ubah ini sesuai kebutuhan, bisa 'text' atau 'logo'
-#     #watermark_type = input("Tipe Watermark: ")
-#     # Memproses file berdasarkan ekstensi
-#     for file_path in file_paths:
-#         ext = file_path.split('.')[-1].lower()
-        
-#         if ext in ['jpg', 'jpeg', 'png', 'pdf']:
-#             #watermark_image(file_path, watermark_type)
-#             watermark_image([file_path],output_path='Watermarked Content',
-#                     text='Sample Watermark',font_type='hershey script simplex',
-#                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='png',
-#                     enchance_quality=True,
-#                     logo_path=None)
-#                     #logo_path='Gambar\watermark logo.png')
-
-
-#         elif ext in ['mp4', 'avi', 'mov']:
-#             watermark_video([file_path],output_path='Watermarked Content',
-#                     text='Sample Watermark',font_type='hershey script simplex',
-#                     font_color='red',position_str='bawah kanan',opacity=0.3,output_format='mp4',
-#                     enchance_quality=True,
-#                     logo_path='')
-#                     #logo_path='Gambar\watermark logo.png')

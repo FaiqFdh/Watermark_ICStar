@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
-from tkinter import Tk
-from tkinter.filedialog import askopenfilenames
 import os
+from PIL import Image, ImageDraw, ImageFont
+from pdf2image import convert_from_path
 
 def get_color_from_string(color_str):
     """Mengambil warna RGB dari input string hex (#RRGGBB) atau nama warna ('red', 'green', 'blue')."""
@@ -62,8 +62,6 @@ def get_cv2_font(font_name):
     else:
         raise ValueError(f"Font '{font_name}' tidak ditemukan. Harap gunakan salah satu dari font berikut: {list(font_dict.keys())}")
 
-from PIL import Image, ImageDraw, ImageFont
-
 def add_text_watermark(image, text, position_str, font_type='hershey simplex', font_color='red', scale_factor=0.3, thickness=2, opacity=0.6):
     """Menambahkan watermark teks ke gambar dengan skala otomatis pada posisi yang ditentukan."""
     image_h, image_w, _ = image.shape
@@ -76,9 +74,9 @@ def add_text_watermark(image, text, position_str, font_type='hershey simplex', f
 
     # Periksa apakah font termasuk font OpenCV atau eksternal
     if font_type.lower() in get_cv2_fonts():
-        font = get_cv2_font(font_type)
-        font_scale = scale_factor * min(image_w, image_h) / 150
-        text_size, baseline = cv2.getTextSize(text, font, font_scale, thickness)
+        font = get_cv2_font(font_type) # Menentukan Font yang dipakai
+        font_scale = scale_factor * min(image_w, image_h) / 150 # Menghitung nilai font_scale. Min(image_w, image_h) memilih ukuran terkecil antara lebar (image_w) dan tinggi (image_h) dari gambar untuk mengatur skala font agar proporsional dengan ukuran gambar.
+        text_size, baseline = cv2.getTextSize(text, font, font_scale, thickness) # Fungsi cv2.getTextSize digunakan untuk menghitung ukuran teks (text_size) dan baseline teks (baseline) berdasarkan font, skala font (font_scale), dan ketebalan (thickness). text_size akan berisi lebar dan tinggi teks dalam piksel.
         text_w, text_h = text_size
     else:
         # Gunakan font eksternal dari folder Font jika tidak ada di OpenCV
@@ -91,16 +89,16 @@ def add_text_watermark(image, text, position_str, font_type='hershey simplex', f
         
         # Menggunakan font eksternal
         font_scale = int(scale_factor * min(image_w, image_h) / 10)  # Sesuaikan ukuran font
-        font = ImageFont.truetype(font_path, font_scale)
+        font = ImageFont.truetype(font_path, font_scale) # BMembuat objek font menggunakan font eksternal yang berada di jalur font_path dengan ukuran yang ditentukan oleh font_scale. Fungsi ImageFont.truetype dari modul PIL digunakan untuk mendukung font TTF (TrueType Font) eksternal.
         
         # Konversi gambar ke format Pillow untuk mendukung font eksternal
-        pil_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        draw = ImageDraw.Draw(pil_image)
+        pil_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)) # Mengonversi gambar OpenCV (image) menjadi format PIL. OpenCV menggunakan format warna BGR secara default, sehingga cv2.cvtColor digunakan untuk mengubah gambar ke format RGB sebelum konversi ke format PIL menggunakan Image.fromarray.
+        draw = ImageDraw.Draw(pil_image) # Baris ini membuat objek draw dari ImageDraw, yang memungkinkan Anda menggambar di atas pil_image. Dengan draw, Anda dapat menambahkan teks, bentuk, dan elemen lain ke dalam gambar.
         
         # Menggunakan textbbox untuk mendapatkan ukuran teks
-        text_bbox = draw.textbbox((0, 0), text, font=font)
-        text_w = text_bbox[2] - text_bbox[0]
-        text_h = text_bbox[3] - text_bbox[1]
+        text_bbox = draw.textbbox((0, 0), text, font=font) # draw.textbbox untuk menghitung kotak pembatas (bounding box) dari teks yang akan ditampilkan. text_bbox mengembalikan tuple yang berisi koordinat bounding box (kiri, atas, kanan, bawah) berdasarkan font yang diberikan. Koordinat ini memungkinkan kita mengetahui ukuran teks yang akan digambar.
+        text_w = text_bbox[2] - text_bbox[0] # Baris ini menghitung lebar teks (text_w) dengan mengurangkan nilai kiri (text_bbox[0]) dari kanan (text_bbox[2]). Ini memberikan lebar aktual teks dalam piksel.
+        text_h = text_bbox[3] - text_bbox[1] # Baris ini menghitung tinggi teks (text_h) dengan mengurangkan nilai atas (text_bbox[1]) dari bawah (text_bbox[3]). Ini memberikan tinggi aktual teks dalam piksel.
         
     # Menentukan posisi watermark
     positions = {
@@ -121,7 +119,7 @@ def add_text_watermark(image, text, position_str, font_type='hershey simplex', f
     # Periksa dan sesuaikan posisi agar teks tidak keluar dari batas gambar
     x, y = position
     if x + text_w > image_w:  # Jika teks keluar batas kanan gambar
-        x = image_w - text_w - 10
+        x = image_w - text_w - 10 # Jika teks keluar dari batas kanan gambar, baris ini akan menyesuaikan nilai x agar teks berada dalam batas kanan gambar dengan memberikan jarak 10 piksel dari tepi.
     if y + text_h > image_h:  # Jika teks keluar batas bawah gambar
         y = image_h - text_h - 10
     if x < 0:  # Jika teks keluar batas kiri gambar
@@ -137,12 +135,12 @@ def add_text_watermark(image, text, position_str, font_type='hershey simplex', f
         
         # Tambahkan teks ke gambar menggunakan Pillow untuk font eksternal
         draw.text(position, text, fill=font_color_rgb, font=font)
-        image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+        image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR) # Convert kembali dalam bentuk format openCV
     else:
         # Buat overlay untuk OpenCV text
-        overlay = image.copy()
-        cv2.putText(overlay, text, position, font, font_scale, font_color, thickness, cv2.LINE_AA)
-        cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image)
+        overlay = image.copy() # Salinan ini digunakan untuk menempatkan teks secara terpisah dari gambar asli, yang memungkinkan pengaturan transparansi (opacity) melalui efek overlay. 
+        cv2.putText(overlay, text, position, font, font_scale, font_color, thickness, cv2.LINE_AA) # cv2.LINE_AA: jenis garis anti-aliasing untuk membuat tepi teks lebih halus.
+        cv2.addWeighted(overlay, opacity, image, 1 - opacity, 0, image) # Menggabungkan gambar overlay dengan teks dan gambar asli (image) menggunakan efek transparansi. 
 
     return image
 
@@ -193,31 +191,37 @@ def preprocess_image(image):
 
 def adjust_gamma(image, gamma=1.0):
     """Menerapkan penyesuaian gamma pada gambar. Tingkat kecerahan gambar"""
-    invGamma = 1.0 / gamma
-    table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype("uint8")
-    return cv2.LUT(image, table)
+    invGamma = 1.0 / gamma # Menghitung nilai kebalikan dari gamma, invGamma. Nilai ini digunakan untuk menentukan seberapa besar perubahan kecerahan gambar. Nilai gamma di atas 1 akan membuat gambar lebih gelap, sementara nilai di bawah 1 akan membuat gambar lebih terang.
+    table = np.array([((i / 255.0) ** invGamma) * 255 for i in np.arange(0, 256)]).astype("uint8") #  melakukan operasi penyesuaian gamma untuk setiap nilai pixel
+    return cv2.LUT(image, table) # mengonversi setiap nilai pixel dalam gambar sesuai tabel
 
 def sharpen_image(image):
     """Melakukan penajaman pada gambar menggunakan Unsharp Masking."""
-    blurred = cv2.GaussianBlur(image, (5, 5), 0)
-    sharpened = cv2.addWeighted(image, 1.5, blurred, -0.5, 0)
+    blurred = cv2.GaussianBlur(image, (5, 5), 0) # ukuran kernel yang digunakan untuk blurring (semakin besar kernel, semakin kabur hasilnya). 0: nilai standar deviasi yang otomatis disesuaikan berdasarkan ukuran kernel.
+    sharpened = cv2.addWeighted(image, 1.5, blurred, -0.5, 0) # mengombinasikan gambar asli dan versi buramnya dengan bobot yang berbeda untuk mendapatkan efek tajam. memberikan bobot negatif (-0.5) pada gambar buram untuk mengurangi detail yang kabur dari gambar asli.
     return sharpened
 
 def remove_noise(image):
     """Menghilangkan noise dari gambar menggunakan metode denoising."""
+    #metode OpenCV yang dirancang untuk menghilangkan noise dari gambar berwarna.
+    #h=10: Parameter filter yang menentukan kekuatan penghilangan noise. Semakin tinggi nilainya, semakin banyak noise yang dihilangkan, namun ini juga bisa menghilangkan detail gambar.
+    #templateWindowSize=7: Ukuran jendela untuk perhitungan rata-rata sekitar setiap piksel, digunakan untuk mencari kesamaan. Ukuran yang umum adalah 7x7.
+    #searchWindowSize=21: Ukuran jendela pencarian untuk menemukan area serupa di sekitar piksel. Ukuran yang lebih besar akan meningkatkan kualitas penghilangan noise tetapi menambah waktu pemrosesan.
     return cv2.fastNlMeansDenoisingColored(image, None, h=10, templateWindowSize=7, searchWindowSize=21)
 
-def unblur_image(image):
-    """Mengurangi blur pada gambar menggunakan filter Laplacian."""
-    laplacian_filter = cv2.Laplacian(image, cv2.CV_64F)
-    unblurred = cv2.subtract(image, laplacian_filter.astype(np.uint8))
-    return unblurred
+# def unblur_image(image):
+#     """Mengurangi blur pada gambar menggunakan filter Laplacian."""
+#     laplacian_filter = cv2.Laplacian(image, cv2.CV_64F) # metode yang menggunakan filter Laplacian untuk mendeteksi tepi pada gambar
+#     unblurred = cv2.subtract(image, laplacian_filter.astype(np.uint8)) # melakukan pengurangan nilai piksel antara gambar asli dan gambar dengan filter Laplacian untuk mengurangi blur dan meningkatkan ketajaman.
+#     return unblurred
 
 def preprocess_logo(logo, image_size, scale_factor=0.2):
     """Melakukan preprocessing pada logo: mengubah ukuran dan menghilangkan latar belakang."""
     # Mengubah ukuran logo agar proporsional dengan gambar
+    #Mengambil ukuran terkecil dari image_size (antara lebar dan tinggi) agar logo tetap dalam proporsi yang sesuai dengan gambar utama.
+    #Mengalikan hasilnya dengan scale_factor untuk menghitung scale_size, yaitu dimensi baru untuk logo dalam bentuk persegi.
     scale_size = int(min(image_size) * scale_factor)
-    logo = cv2.resize(logo, (scale_size, scale_size), interpolation=cv2.INTER_AREA)
+    logo = cv2.resize(logo, (scale_size, scale_size), interpolation=cv2.INTER_AREA) # untuk memperkecil ukuran gambar secara efektif.
     logo_rgba = remove_background(logo)
 
     return logo_rgba
@@ -268,6 +272,11 @@ def add_logo_watermark(image, logo, position_str, opacity):
     position = get_watermark_position(image, logo, position_str)
 
     # Tambahkan logo ke gambar dengan transparansi
+    # Mengambil nilai pixel dari logo.
+    # Mengalikan nilai pixel logo dengan nilai transparansi yang telah disesuaikan.
+    # Mengambil nilai pixel dari gambar asli di area yang sama.
+    # Mengalikan nilai pixel gambar asli dengan nilai kebalikannya dari transparansi logo.
+    # Menjumlahkan kedua hasil tersebut untuk mendapatkan nilai akhir pixel yang akan ditetapkan di gambar utama.
     for c in range(0, 3):
         image[position[1]:position[1]+logo.shape[0], position[0]:position[0]+logo.shape[1], c] = \
             (logo[:, :, c] * (logo[:, :, 3] / 255.0 * opacity) +
@@ -370,7 +379,8 @@ def add_watermark_with_auto_position(image, watermark, font_type='hershey simple
                                 max(optimal_position[1], 0))
             optimal_position = (min(optimal_position[0], image.shape[1] - text_w),
                                 min(optimal_position[1], image.shape[0] - text_h))
-
+            # max() untuk memastikan bahwa koordinat x dan y dari optimal_position tidak negatif, sehingga posisi berada dalam area gambar dan tidak keluar dari batas kiri atau atas gambar.
+            # min() memastikan bahwa posisi x dan y dari optimal_position tidak melampaui batas kanan atau bawah gambar. 
             overlay = image.copy()
             cv2.putText(overlay, watermark, optimal_position, font, font_scale, font_color, thickness, cv2.LINE_AA)
         else:
@@ -471,10 +481,6 @@ def add_watermark_below_image(image, font_type='hershey simplex', text=None, bar
             raise ValueError(f"Font TTF '{ttf_font_path}' tidak ditemukan.")
 
     return combined_image
-
-from pdf2image import convert_from_path
-from PIL import Image
-import numpy as np
 
 def remove_white_background(image, margin=0):
     # Convert image ke format grayscale
