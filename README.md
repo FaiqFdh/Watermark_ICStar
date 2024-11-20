@@ -1,6 +1,6 @@
 # Watermark_ICStar
 
-## Recomendation using Collaborative Filtering
+## Watermark System
 Watermark System is a versatile application designed to protect visual content by adding customizable watermarks to images and videos.
 
 ## Library That We Use 
